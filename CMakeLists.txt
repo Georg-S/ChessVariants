@@ -1,0 +1,25 @@
+﻿cmake_minimum_required (VERSION 3.8)
+project(SpecialChess)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+set(CHESS_SERVER_HEADERS "")
+
+set(CHESS_SERVER_SOURCES "src/server_main.cpp")
+
+set(CHESS_CLIENT_HEADERS "")
+
+set(CHESS_CLIENT_SOURCES "src/client_main.cpp")
+
+#source_group("" FILES ${miscFiles})
+
+add_subdirectory(Networking)
+#Server
+add_executable(ChessServer ${CHESS_SERVER_HEADERS} ${CHESS_SERVER_SOURCES})
+target_include_directories(ChessServer PUBLIC "include")
+target_link_libraries(ChessServer Networking)
+#Client
+add_executable(ChessClient ${CHESS_CLIENT_HEADERS} ${CHESS_CLIENT_SOURCES})
+target_include_directories(ChessClient PUBLIC "include")
+target_link_libraries(ChessClient Networking)
+
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ChessServer)
