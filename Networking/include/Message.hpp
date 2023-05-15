@@ -2,18 +2,21 @@
 #include <cstdint>
 
 template <typename T>
-struct Message 
+struct Message
 {
-	uint32_t headerId;
-	size_t bodySize;
+	struct Header
+	{
+		uint32_t headerId;
+		uint32_t bodySize;
+	};
 	T body;
 
-	size_t headerSize() const
+	size_t headerSize() constexpr
 	{
 		return sizeof(headerId) + sizeof(totalSize);
 	}
 
-	size_t totalSize() const 
+	size_t totalSize() const
 	{
 		return headerSize() + bodySize();
 	}

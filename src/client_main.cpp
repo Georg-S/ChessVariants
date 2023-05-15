@@ -9,10 +9,9 @@ using namespace boost;
 
 int main(int argc, char* argv[])
 {
-
-	system::error_code ec;
-	asio::ip::tcp::endpoint endpoint(asio::ip::make_address("127.0.0.1", ec), 2345);
-
+	auto client = std::make_shared<net::TCPClient>("127.0.0.1", 2345);
+	client->connect();
+	client->run();
 
 	return 0;
 }

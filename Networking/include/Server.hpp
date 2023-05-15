@@ -13,7 +13,7 @@ namespace net
 	class Session : public std::enable_shared_from_this<Session>
 	{
 	public:
-		Session(tcp::socket socket, size_t id)
+		Session(tcp::socket&& socket, size_t id)
 			: m_socket(std::move(socket))
 			, m_id(id)
 		{
@@ -24,12 +24,12 @@ namespace net
 			do_read();
 		}
 
-	private:
+	public:
 		void do_read()
 		{
 			auto self = shared_from_this();
 			m_socket.async_read_some(boost::asio::buffer(m_buffer, m_max_length),
-				[this, self](boost::system::error_code ec, std::size_t length)
+				[this, self](boost::system::error_code ec, std::size_t bytesTansferred)
 				{
 					if (ec) 
 					{
@@ -37,17 +37,20 @@ namespace net
 						return;
 					}
 
-					auto message = std::string(m_buffer, length);
+					auto message = std::string(m_buffer, bytesTansferred);
 					std::cout << "Received message: " << message << std::endl;
-					do_write(message);
 				});
 		}
 
-		void do_write(const std::string& message)
+		void do_write(std::string message)
 		{
 			auto self = shared_from_this();
-			boost::asio::async_write(m_socket, boost::asio::buffer(message),
-				[this, self, message](boost::system::error_code ec, std::size_t length)
+
+			strcpy_s(m_buffer, message.c_str());
+			const size_t length = strlen(m_buffer) + 1;
+
+			boost::asio::async_write(m_socket, boost::asio::buffer(m_buffer, std::size(m_buffer)),
+				[self](boost::system::error_code ec, size_t bytesTansferred)
 				{
 					if (ec)
 					{
@@ -55,8 +58,8 @@ namespace net
 						return;
 					}
 
-					std::cout << "Sent message: " << message << std::endl;
-					do_read();
+					std::cout << "Sent " << bytesTansferred << " bytes." << std::endl;
+					//do_read();
 				});
 		}
 
@@ -67,22 +70,26 @@ namespace net
 	};
 
 	// Derive from this class to create a server for your application
-	class Server
+	class TCPServer
 	{
 	public:
-		Server(const tcp::endpoint& endpoint)
-			: m_acceptor(m_context, endpoint)
+		TCPServer(std::string ip, uint16_t port)
 		{
+			boost::system::error_code ec;
+			m_acceptor = std::make_unique<tcp::acceptor>(m_context, tcp::endpoint(boost::asio::ip::make_address(ip, ec), port));
+			if (ec) 
+				std::cout << "Error creating acceptor: " << ec.what();
+
+			do_accept();
 		}
 
-		virtual ~Server() 
+		virtual ~TCPServer()
 		{
 			stop();
 		}
 
 		void start() 
 		{
-			do_accept();
 			m_context.run();
 		}
 
@@ -94,26 +101,28 @@ namespace net
 	private:
 		void do_accept()
 		{
-			m_acceptor.async_accept(
+			m_acceptor->async_accept(
 				[this](boost::system::error_code ec, tcp::socket socket)
 				{
-					if (!ec)
-					{
-						std::cout << m_sessionId << " connected to server" << std::endl;
-						m_sessions.emplace_back(std::move(socket), m_sessionId++);
-					}
-					else 
+					if (ec)
 					{
 						std::cout << "Connection failed with error code: " << ec.what() << std::endl;
+						do_accept();
+						return;
 					}
+
+					std::cout << m_sessionId << " connected to server" << std::endl;
+					m_sessions.emplace_back(std::make_shared<Session>(std::move(socket), m_sessionId++));
+					m_sessions.back()->do_read();
+					m_sessions.back()->do_write("Hallo Welt!");
 
 					do_accept();
 				});
 		}
 
 		boost::asio::io_context m_context;
-		std::vector<Session> m_sessions;
-		tcp::acceptor m_acceptor;
+		std::vector<std::shared_ptr<Session>> m_sessions;
+		std::unique_ptr<tcp::acceptor> m_acceptor;
 		size_t m_sessionId = 1;
 	};
 }
