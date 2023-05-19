@@ -47,6 +47,8 @@ void net::TCPServer::do_accept()
 	m_acceptor->async_accept(
 		[this](boost::system::error_code ec, tcp::socket socket)
 		{
+			std::shared_ptr<tcp::socket> socketPtr = std::make_shared<tcp::socket>(std::move(socket));
+
 			if (ec)
 			{
 				std::cout << "Connection failed with error code: " << ec.what() << std::endl;
@@ -55,8 +57,8 @@ void net::TCPServer::do_accept()
 			}
 
 			std::cout << m_sessionId << " connected to server" << std::endl;
-			m_sessions.emplace_back(std::make_shared<Session>(std::move(socket), m_sessionId++));
-			m_sessions.back()->do_read();
+			m_sessions.emplace_back(std::make_shared<Session>(socketPtr, m_sessionId++, &this->m_inMessages));
+			m_sessions.back()->read_header();
 
 			do_accept();
 		});

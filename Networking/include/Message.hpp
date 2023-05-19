@@ -4,8 +4,9 @@
 
 namespace net
 {
-	struct Message
+	class Message
 	{
+	public:
 		struct Header
 		{
 			uint32_t id;
@@ -52,6 +53,7 @@ namespace net
 		{
 			return headerSize() + bodySize();
 		}
+
 	private:
 		void allocateAndInitializeBuffer()
 		{

@@ -5,7 +5,7 @@ using namespace net;
 net::TCPClient::TCPClient(std::string ipAddress, uint16_t port)
 	: m_ip(std::move(ipAddress))
 	, m_port(port)
-	, m_socket(m_context)
+	, m_socket(std::make_shared<tcp::socket>(m_context))
 {
 }
 
@@ -29,11 +29,26 @@ void net::TCPClient::stop()
 	std::cout << "Client stopped" << std::endl;
 }
 
+size_t net::TCPClient::getMessageCount() const
+{
+	return m_inMessages.getSize();
+}
+
+std::shared_ptr<Message> net::TCPClient::getFirstMessage()
+{
+	return m_inMessages.getFront();
+}
+
+void net::TCPClient::popFrontMessage()
+{
+	m_inMessages.popFront();
+}
+
 void net::TCPClient::do_connect(const tcp::resolver::results_type& endpoints)
 {
 	auto self(shared_from_this());
-	boost::asio::async_connect(m_socket, endpoints,
-		[self](boost::system::error_code ec, tcp::endpoint socket)
+	boost::asio::async_connect(*m_socket, endpoints,
+		[self] (boost::system::error_code ec, tcp::endpoint tcpEndpoint) mutable
 		{
 			if (ec)
 			{
@@ -42,47 +57,8 @@ void net::TCPClient::do_connect(const tcp::resolver::results_type& endpoints)
 			}
 
 			std::cout << "Connected to server" << std::endl;
-			self->readHeader();
-		});
-}
 
-void net::TCPClient::readHeader()
-{
-	m_currentMessageHeader = {};
-	auto self(shared_from_this());
-	boost::asio::async_read(m_socket,
-		boost::asio::buffer(&m_currentMessageHeader, Message::headerSize()),
-		[self](boost::system::error_code ec, size_t bytesRead)
-		{
-			if (ec)
-			{
-				std::cout << "Error reading message: " << ec.what();
-				return;
-			}
-
-			self->readBody();
-		});
-}
-
-void net::TCPClient::readBody()
-{
-	auto resMessage = std::make_shared<Message>(m_currentMessageHeader);
-
-	auto self(shared_from_this());
-	boost::asio::async_read(m_socket,
-		boost::asio::buffer(resMessage->getBodyStart(), resMessage->bodySize()),
-		[self, resMessage](boost::system::error_code ec, std::size_t bytesRead)
-		{
-			if (ec)
-			{
-				std::cout << "Error reading message: " << ec.what();
-				return;
-			}
-			
-			self->m_inMessagesMut.lock();
-			self->m_inMessages.emplace_back(std::move(resMessage));
-			self->m_inMessagesMut.unlock();
-
-			self->readHeader();
+			self->m_session = std::make_shared<Session>(self->m_socket, &self->m_inMessages);
+			self->m_session->read_header();
 		});
 }

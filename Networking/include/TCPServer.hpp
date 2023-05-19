@@ -33,5 +33,6 @@ namespace net
 		std::unique_ptr<tcp::acceptor> m_acceptor;
 		std::thread m_thread;
 		uint32_t m_sessionId = SessionStartId;
+		MessageQueue m_inMessages;
 	};
 }

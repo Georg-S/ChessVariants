@@ -1,30 +1,89 @@
 #include "Utility.hpp"
 
-net::Session::Session(tcp::socket&& socket, size_t id)
-	: m_socket(std::move(socket))
+using namespace net;
+
+size_t net::MessageQueue::getSize() const
+{
+	std::scoped_lock lock(m_mut);
+	return m_messages.size();
+}
+
+void net::MessageQueue::addMessage(std::shared_ptr<Message> message)
+{
+	m_messages.emplace_back(message);
+}
+
+std::shared_ptr<Message> net::MessageQueue::getFront()
+{
+	std::scoped_lock lock(m_mut);
+
+	if (m_messages.empty())
+		return nullptr;
+	return m_messages.front();
+}
+
+void net::MessageQueue::popFront()
+{
+	std::scoped_lock lock(m_mut);
+
+	if (!m_messages.empty())
+		m_messages.pop_front();
+}
+
+net::Session::Session(std::shared_ptr<tcp::socket> socket, MessageQueue* messageQueue)
+	: m_socket(socket)
+	, m_id(SERVER)
+	, m_messageQueue(messageQueue)
+{
+}
+
+net::Session::Session(std::shared_ptr<tcp::socket> socket, size_t id, MessageQueue* messageQueue)
+	: m_socket(socket)
 	, m_id(id)
+	, m_messageQueue(messageQueue)
 {
 }
 
 void net::Session::start()
 {
-	do_read();
+	read_header();
 }
 
-void net::Session::do_read()
+void net::Session::read_header()
 {
-	auto self = shared_from_this();
-	m_socket.async_read_some(boost::asio::buffer(m_buffer, m_max_length),
-		[this, self](boost::system::error_code ec, std::size_t bytesTansferred)
+	m_currentMessageHeader = {};
+	auto self(shared_from_this());
+	boost::asio::async_read(*m_socket,
+		boost::asio::buffer(&m_currentMessageHeader, Message::headerSize()),
+		[self](boost::system::error_code ec, size_t bytesRead)
 		{
 			if (ec)
 			{
-				std::cout << "Error in Session occured: " << ec.what() << std::endl;
+				std::cout << "Error reading message: " << ec.what();
 				return;
 			}
 
-			auto message = std::string(m_buffer, bytesTansferred);
-			std::cout << "Received message: " << message << std::endl;
+			self->read_body();
+		});
+}
+
+void net::Session::read_body()
+{
+	auto resMessage = std::make_shared<Message>(m_currentMessageHeader);
+
+	auto self(shared_from_this());
+	boost::asio::async_read(*m_socket,
+		boost::asio::buffer(resMessage->getBodyStart(), resMessage->bodySize()),
+		[self, resMessage](boost::system::error_code ec, std::size_t bytesRead)
+		{
+			if (ec)
+			{
+				std::cout << "Error reading message: " << ec.what();
+				return;
+			}
+
+			self->m_messageQueue->addMessage(resMessage);
+			self->read_header();
 		});
 }
 
@@ -32,10 +91,7 @@ void net::Session::do_write(std::shared_ptr<Message> message)
 {
 	auto self = shared_from_this();
 
-	std::cout << &message->dataBuffer << std::endl;
-	std::cout << message->dataBuffer.data() << std::endl;
-
-	boost::asio::async_write(m_socket, boost::asio::buffer(message->getMessageStart(), message->messageSize()),
+	boost::asio::async_write(*m_socket, boost::asio::buffer(message->getMessageStart(), message->messageSize()),
 		[self](boost::system::error_code ec, size_t bytesTansferred)
 		{
 			if (ec)
