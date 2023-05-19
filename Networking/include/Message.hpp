@@ -14,13 +14,13 @@ namespace net
 		Header header;
 		std::vector<uint8_t> body;
 
-		Message(uint32_t id, void* obj, uint32_t size)
+		Message(uint32_t id, void* data, uint32_t dataSize)
 		{
 			header.id = id;
-			header.bodySize = size;
-			body = std::vector<uint8_t>(size + headerSize(), 0);
+			header.bodySize = dataSize;
+			body = std::vector<uint8_t>(dataSize + headerSize(), 0);
 			memcpy_s(body.data(), headerSize(), static_cast<void*>(&header), headerSize());
-			memcpy_s((body.data() + headerSize()), header.bodySize, obj, size);
+			memcpy_s((body.data() + headerSize()), header.bodySize, data, dataSize);
 		}
 
 		constexpr static uint32_t headerSize()

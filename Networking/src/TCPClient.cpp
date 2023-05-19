@@ -18,7 +18,15 @@ void net::TCPClient::connect()
 
 void net::TCPClient::run()
 {
-	m_context.run();
+	m_thread = std::thread([this]() {m_context.run(); });
+}
+
+void net::TCPClient::stop()
+{
+	m_context.stop();
+	if (m_thread.joinable())
+		m_thread.join();
+	std::cout << "Client stopped" << std::endl;
 }
 
 void net::TCPClient::do_connect(const tcp::resolver::results_type& endpoints)

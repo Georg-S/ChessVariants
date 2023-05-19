@@ -28,6 +28,7 @@ namespace net
 		boost::asio::io_context m_context;
 		std::vector<std::shared_ptr<Session>> m_sessions;
 		std::unique_ptr<tcp::acceptor> m_acceptor;
+		std::thread m_thread;
 		size_t m_sessionId = 1;
 	};
 }

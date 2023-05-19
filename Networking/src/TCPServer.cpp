@@ -17,12 +17,15 @@ net::TCPServer::~TCPServer()
 
 void net::TCPServer::start()
 {
-	m_context.run();
+	m_thread = std::thread([this]() {m_context.run(); });
 }
 
 void net::TCPServer::stop()
 {
 	m_context.stop();
+	if (m_thread.joinable())
+		m_thread.join();
+	std::cout << "Server stopped" << std::endl;
 }
 
 void net::TCPServer::do_accept()

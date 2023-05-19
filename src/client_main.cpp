@@ -13,5 +13,7 @@ int main(int argc, char* argv[])
 	client->connect();
 	client->run();
 
+	while (true);
+
 	return 0;
 }

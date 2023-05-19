@@ -11,6 +11,10 @@ int main(int argc, char* argv[])
 {
 	auto myServer = std::make_unique<net::TCPServer>("127.0.0.1", 2345);
 	myServer->start();
+	myServer->stop();
+
+	while (true);
+
 
 	return 0;
 }

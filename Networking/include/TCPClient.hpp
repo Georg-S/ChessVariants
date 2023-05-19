@@ -19,12 +19,14 @@ namespace net
 		void connect();
 		virtual ~TCPClient() = default;
 		void run();
+		void stop();
 
 	private:
 		void do_connect(const tcp::resolver::results_type& endpoints);
 		void readMessage();
 
 		std::string m_ip;
+		std::thread m_thread;
 		uint16_t m_port;
 		boost::asio::io_context m_context;
 		tcp::socket m_socket;
