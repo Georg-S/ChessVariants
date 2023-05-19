@@ -28,14 +28,14 @@ void net::Session::do_read()
 		});
 }
 
-void net::Session::do_write(std::string message) 
+void net::Session::do_write(std::shared_ptr<Message> message)
 {
 	auto self = shared_from_this();
 
-	strcpy_s(m_buffer, message.c_str());
-	const size_t length = strlen(m_buffer) + 1;
+	std::cout << &message->dataBuffer << std::endl;
+	std::cout << message->dataBuffer.data() << std::endl;
 
-	boost::asio::async_write(m_socket, boost::asio::buffer(m_buffer, std::size(m_buffer)),
+	boost::asio::async_write(m_socket, boost::asio::buffer(message->getMessageStart(), message->messageSize()),
 		[self](boost::system::error_code ec, size_t bytesTansferred)
 		{
 			if (ec)
@@ -45,6 +45,5 @@ void net::Session::do_write(std::string message)
 			}
 
 			std::cout << "Sent " << bytesTansferred << " bytes." << std::endl;
-			//do_read();
 		});
 }

@@ -42,16 +42,17 @@ void net::TCPClient::do_connect(const tcp::resolver::results_type& endpoints)
 			}
 
 			std::cout << "Connected to server" << std::endl;
-			self->readMessage();
+			self->readHeader();
 		});
 }
 
-void net::TCPClient::readMessage()
+void net::TCPClient::readHeader()
 {
+	m_currentMessageHeader = {};
 	auto self(shared_from_this());
 	boost::asio::async_read(m_socket,
-		boost::asio::buffer(m_buffer, std::size(m_buffer)),
-		[self](boost::system::error_code ec, std::size_t length)
+		boost::asio::buffer(&m_currentMessageHeader, Message::headerSize()),
+		[self](boost::system::error_code ec, size_t bytesRead)
 		{
 			if (ec)
 			{
@@ -59,9 +60,29 @@ void net::TCPClient::readMessage()
 				return;
 			}
 
-			//std::string receivedMessage = std::string(self->m_buffer);
-			std::cout << (const char*)self->m_buffer << std::endl;
+			self->readBody();
+		});
+}
 
-			self->readMessage();
+void net::TCPClient::readBody()
+{
+	auto resMessage = std::make_shared<Message>(m_currentMessageHeader);
+
+	auto self(shared_from_this());
+	boost::asio::async_read(m_socket,
+		boost::asio::buffer(resMessage->getBodyStart(), resMessage->bodySize()),
+		[self, resMessage](boost::system::error_code ec, std::size_t bytesRead)
+		{
+			if (ec)
+			{
+				std::cout << "Error reading message: " << ec.what();
+				return;
+			}
+			
+			self->m_inMessagesMut.lock();
+			self->m_inMessages.emplace_back(std::move(resMessage));
+			self->m_inMessagesMut.unlock();
+
+			self->readHeader();
 		});
 }

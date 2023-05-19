@@ -18,7 +18,7 @@ namespace net
 		Session(tcp::socket&& socket, size_t id);
 		void start();
 		void do_read();
-		void do_write(std::string message);
+		void do_write(std::shared_ptr<Message> message);
 
 		size_t m_id;
 		tcp::socket m_socket;

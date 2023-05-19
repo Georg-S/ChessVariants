@@ -21,14 +21,17 @@ namespace net
 		virtual ~TCPServer();
 		void start();
 		void stop();
+		void writeMessageToClient(std::shared_ptr<Message> message, uint32_t clientId);
+		size_t getCountOfConnectedClients() const;
 
 	private:
 		void do_accept();
 
+		static constexpr uint32_t SessionStartId = 1;
 		boost::asio::io_context m_context;
 		std::vector<std::shared_ptr<Session>> m_sessions;
 		std::unique_ptr<tcp::acceptor> m_acceptor;
 		std::thread m_thread;
-		size_t m_sessionId = 1;
+		uint32_t m_sessionId = SessionStartId;
 	};
 }

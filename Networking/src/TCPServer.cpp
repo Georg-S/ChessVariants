@@ -28,6 +28,20 @@ void net::TCPServer::stop()
 	std::cout << "Server stopped" << std::endl;
 }
 
+void net::TCPServer::writeMessageToClient(std::shared_ptr<Message> message, uint32_t clientId)
+{
+	for (auto& session : m_sessions) 
+	{
+		if (session->m_id == clientId)
+			session->do_write(message);
+	}
+}
+
+size_t net::TCPServer::getCountOfConnectedClients() const
+{
+	return m_sessions.size();
+}
+
 void net::TCPServer::do_accept()
 {
 	m_acceptor->async_accept(
@@ -43,7 +57,6 @@ void net::TCPServer::do_accept()
 			std::cout << m_sessionId << " connected to server" << std::endl;
 			m_sessions.emplace_back(std::make_shared<Session>(std::move(socket), m_sessionId++));
 			m_sessions.back()->do_read();
-			m_sessions.back()->do_write("Hallo Welt!");
 
 			do_accept();
 		});

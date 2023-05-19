@@ -12,15 +12,30 @@ namespace net
 			uint32_t bodySize;
 		};
 		Header header;
-		std::vector<uint8_t> body;
+		std::vector<uint8_t> dataBuffer;
+
+		Message(Header header)
+			: header(std::move(header))
+		{
+			allocateAndInitializeBuffer();
+		}
 
 		Message(uint32_t id, void* data, uint32_t dataSize)
 		{
 			header.id = id;
 			header.bodySize = dataSize;
-			body = std::vector<uint8_t>(dataSize + headerSize(), 0);
-			memcpy_s(body.data(), headerSize(), static_cast<void*>(&header), headerSize());
-			memcpy_s((body.data() + headerSize()), header.bodySize, data, dataSize);
+			allocateAndInitializeBuffer();
+			memcpy_s(getBodyStart(), header.bodySize, data, dataSize);
+		}
+
+		void* getMessageStart() 
+		{
+			return dataBuffer.data();
+		}
+
+		void* getBodyStart() 
+		{
+			return dataBuffer.data() + headerSize();
 		}
 
 		constexpr static uint32_t headerSize()
@@ -30,12 +45,18 @@ namespace net
 
 		uint32_t bodySize() const
 		{
-			return static_cast<uint32_t>(body.size());
+			return static_cast<uint32_t>(header.bodySize);
 		}
 
 		uint32_t messageSize() const
 		{
 			return headerSize() + bodySize();
+		}
+	private:
+		void allocateAndInitializeBuffer()
+		{
+			dataBuffer = std::vector<uint8_t>(header.bodySize + headerSize(), 0);
+			memcpy_s(dataBuffer.data(), headerSize(), static_cast<void*>(&header), headerSize());
 		}
 	};
 }
