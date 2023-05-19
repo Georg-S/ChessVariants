@@ -3,7 +3,7 @@
 #include <boost/asio.hpp>
 #include <boost/asio/ts/buffer.hpp>
 #include <boost/asio/ts/internet.hpp>
-#include <Client.hpp>
+#include <TCPClient.hpp>
 
 using namespace boost;
 

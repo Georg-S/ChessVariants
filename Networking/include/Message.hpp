@@ -30,12 +30,12 @@ namespace net
 
 		uint32_t bodySize() const
 		{
-			return body.size();
+			return static_cast<uint32_t>(body.size());
 		}
 
 		uint32_t messageSize() const
 		{
-			return headerSize() + body.size();
+			return headerSize() + bodySize();
 		}
 	};
 }

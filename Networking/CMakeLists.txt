@@ -5,12 +5,14 @@ project(Networking)
 
 
 set(HEADERS 
-	"include/Server.hpp"
-	"include/Client.hpp"
+	"include/TCPServer.hpp"
+	"include/TCPClient.hpp"
 	"include/Message.hpp"
 	"include/Utility.hpp")
 
 set(SOURCES 
+	"src/TCPServer.cpp"
+	"src/TCPClient.cpp"
 	"src/Utility.cpp")
 
 if (MSVC)
