@@ -27,7 +27,7 @@ namespace net
 	private:
 		void sendMessage();
 		void writeMessageToClient(std::shared_ptr<Message> message);
-		void sendMessage(std::shared_ptr<Message> message, Session* session);
+		void sendMessage(std::shared_ptr<Message> message, std::shared_ptr<Session> session);
 		void acceptConnection();
 
 		static constexpr uint32_t SessionStartId = 2;

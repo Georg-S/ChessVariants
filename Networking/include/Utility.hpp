@@ -43,9 +43,11 @@ namespace net
 	public:
 		Session(std::shared_ptr<tcp::socket> socket, MessageQueue* messageQueue);
 		Session(std::shared_ptr<tcp::socket> socket, size_t id, MessageQueue* messageQueue);
+		~Session();
 		void start();
 		void readHeader();
 		void readBody();
+		void disconnect();
 		void writeMessage(std::shared_ptr<Message> message, std::function<void(boost::system::error_code, std::size_t)> callBack);
 		bool isConnected() const;
 

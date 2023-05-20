@@ -18,13 +18,13 @@ int main(int argc, char* argv[])
 
 	while (true) 
 	{
-		Sleep(10);
 		if (myServer->getCountOfConnectedClients() && doOnce) 
 		{
 			doOnce = false;
 			myServer->sendMessage(outMessage);
 		}
 
+		Sleep(1000);
 		auto inMessage = myServer->getAndRemoveFirstMessage();
 		if (inMessage)
 		{

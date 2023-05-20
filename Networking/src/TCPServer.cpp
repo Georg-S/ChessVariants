@@ -58,31 +58,40 @@ void net::TCPServer::sendMessage()
 
 void net::TCPServer::writeMessageToClient(std::shared_ptr<Message> message)
 {
-	for (auto& session : m_sessions)
+	for (size_t i = 0; i < m_sessions.size(); i++)
 	{
+		auto& session = m_sessions[i];
 		if (session->m_id == message->header.id)
 		{
-			sendMessage(message, session.get());
+			if (session->isConnected()) 
+			{
+				sendMessage(message, session);
+			}
+			else 
+			{
+				std::cout << "Connection lost to client: " << session->m_id << std::endl;
+				m_sessions.erase(m_sessions.begin() + i);
+			}
 			return;
 		}
 	}
 	std::cout << "Message could not be sent, client not found " << std::endl;
 }
 
-void net::TCPServer::sendMessage(std::shared_ptr<Message> message, Session* session)
+void net::TCPServer::sendMessage(std::shared_ptr<Message> message, std::shared_ptr<Session> session)
 {
-	auto callback = [this](boost::system::error_code ec, std::size_t bytesWritten)
+	auto callback = [this, session](boost::system::error_code ec, std::size_t bytesWritten)
 	{
+		auto newQueueSize = m_outMessages.popFront();
 		if (ec)
 		{
-			std::cout << "Error occured while writing message: " << ec.what() << std::endl;
-			sendMessage(); // TODO maybe handle the error somehow? Currently try to send message again
+			std::cout << "Error occured while writing message ... closing session: " << ec.what() << std::endl;
+			session->disconnect();
 			return;
 		}
 		std::cout << "Sent " << bytesWritten << " bytes." << std::endl;
 
-		auto newSize = m_outMessages.popFront();
-		if (newSize > 0)
+		if (newQueueSize > 0)
 			sendMessage();
 	};
 

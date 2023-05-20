@@ -66,6 +66,11 @@ net::Session::Session(std::shared_ptr<tcp::socket> socket, size_t id, MessageQue
 {
 }
 
+net::Session::~Session()
+{
+	disconnect();
+}
+
 void net::Session::start()
 {
 	readHeader();
@@ -81,7 +86,8 @@ void net::Session::readHeader()
 		{
 			if (ec)
 			{
-				std::cout << "Error reading message: " << ec.what();
+				std::cout << "Error reading message header ... closing socket: " << ec.what();
+				self->m_socket->close();
 				return;
 			}
 
@@ -100,7 +106,8 @@ void net::Session::readBody()
 		{
 			if (ec)
 			{
-				std::cout << "Error reading message: " << ec.what();
+				std::cout << "Error reading message body ... closing socket: " << ec.what();
+				self->m_socket->close();
 				return;
 			}
 
@@ -109,37 +116,16 @@ void net::Session::readBody()
 		});
 }
 
-void net::Session::writeMessage(std::shared_ptr<Message> message, std::function<void(boost::system::error_code, std::size_t)> callBack)
+void net::Session::disconnect()
 {
-	auto self = shared_from_this();
-
-	//if (ec)
-	//{
-	//	std::cout << "Error occured while writing message: " << ec.what() << std::endl;
-	//	return;
-	//}
-
-	//std::cout << "Sent " << bytesTansferred << " bytes." << std::endl;
-
-	boost::asio::async_write(*m_socket, boost::asio::buffer(message->getMessageStart(), message->messageSize()), callBack);
+	if (m_socket->is_open())
+		m_socket->close();
 }
 
-//void net::Session::writeMessage(std::shared_ptr<Message> message)
-//{
-//	auto self = shared_from_this();
-//
-//	boost::asio::async_write(*m_socket, boost::asio::buffer(message->getMessageStart(), message->messageSize()),
-//		[self](boost::system::error_code ec, size_t bytesTansferred)
-//		{
-//			if (ec)
-//			{
-//				std::cout << "Error occured while writing message: " << ec.what() << std::endl;
-//				return;
-//			}
-//
-//			std::cout << "Sent " << bytesTansferred << " bytes." << std::endl;
-//		});
-//}
+void net::Session::writeMessage(std::shared_ptr<Message> message, std::function<void(boost::system::error_code, std::size_t)> callBack)
+{
+	boost::asio::async_write(*m_socket, boost::asio::buffer(message->getMessageStart(), message->messageSize()), callBack);
+}
 
 bool net::Session::isConnected() const
 {

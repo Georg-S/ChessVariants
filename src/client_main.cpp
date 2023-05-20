@@ -18,7 +18,6 @@ int main(int argc, char* argv[])
 
 	while (true) 
 	{
-		Sleep(10);
 		auto message = client->getAndRemoveFirstMessage();
 		if (message)
 		{
