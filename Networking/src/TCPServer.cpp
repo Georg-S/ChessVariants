@@ -23,8 +23,14 @@ void net::TCPServer::start()
 void net::TCPServer::stop()
 {
 	m_context.stop();
+
+	for (auto& session : m_sessions)
+		session->disconnect();
+	m_sessions.clear();
+
 	if (m_thread.joinable())
 		m_thread.join();
+
 	std::cout << "Server stopped" << std::endl;
 }
 
@@ -45,12 +51,22 @@ void net::TCPServer::sendMessage(std::shared_ptr<Message> message)
 		sendMessage();
 }
 
+void net::TCPServer::broadcastMessage(std::shared_ptr<Message> message)
+{
+	for (auto& session : m_sessions) 
+	{
+		auto newMessage = std::make_shared<Message>(*message);
+		newMessage->setToID(session->m_id);
+		sendMessage(newMessage);
+	}
+}
+
 void net::TCPServer::sendMessage()
 {
 	assert(!m_outMessages.empty());
 	auto message = m_outMessages.getFront();
 
-	if (message->header.id == SERVER)
+	if (message->header.toID == SERVER)
 		std::cout << "Message sent from server to server ... do nothing" << std::endl;
 	else
 		writeMessageToClient(message);
@@ -61,7 +77,7 @@ void net::TCPServer::writeMessageToClient(std::shared_ptr<Message> message)
 	for (size_t i = 0; i < m_sessions.size(); i++)
 	{
 		auto& session = m_sessions[i];
-		if (session->m_id == message->header.id)
+		if (session->m_id == message->header.toID)
 		{
 			if (session->isConnected()) 
 			{

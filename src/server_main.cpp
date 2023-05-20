@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
 
 	bool doOnce = true;
 	std::string test = "Ping!";
-	auto outMessage = std::make_shared<net::Message>(static_cast<uint32_t>(2), (void*)test.c_str(), static_cast<uint32_t>(test.size() + 1));
+	auto outMessage = std::make_shared<net::Message>(static_cast<uint32_t>(0), static_cast<uint32_t>(2), (void*)test.c_str(), static_cast<uint32_t>(test.size() + 1));
 
 	while (true) 
 	{
@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 		auto inMessage = myServer->getAndRemoveFirstMessage();
 		if (inMessage)
 		{
-			myServer->sendMessage(outMessage);
+			myServer->broadcastMessage(outMessage);
 			auto str = std::string(static_cast<const char*>(inMessage->getBodyStart()), inMessage->bodySize());
 			std::cout << str << std::endl;
 		}

@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
 	client->run();
 
 	std::string test = "Pong!";
-	auto outMessage = std::make_shared<net::Message>(static_cast<uint32_t>(0), (void*)test.c_str(), static_cast<uint32_t>(test.size() + 1));
+	auto outMessage = std::make_shared<net::Message>(static_cast<uint32_t>(0), static_cast<uint32_t>(0), (void*)test.c_str(), static_cast<uint32_t>(test.size() + 1));
 
 	while (true) 
 	{

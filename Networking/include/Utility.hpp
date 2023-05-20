@@ -14,12 +14,6 @@ namespace net
 {
 	using boost::asio::ip::tcp;
 
-	enum ConnectionID
-	{
-		SERVER = 0,
-		BROADCAST = 1,
-	};
-
 	// A thread safe message queue
 	class MessageQueue 
 	{

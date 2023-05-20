@@ -19,7 +19,7 @@ namespace net
 	public:
 		TCPClient(std::string ipAddress, uint16_t port);
 		void connect();
-		virtual ~TCPClient() = default;
+		virtual ~TCPClient();
 		void run();
 		void stop();
 		size_t getMessageCount() const;

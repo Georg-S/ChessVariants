@@ -16,6 +16,11 @@ void net::TCPClient::connect()
 	connectTo(endPoints);
 }
 
+net::TCPClient::~TCPClient()
+{
+	m_session->disconnect();
+}
+
 void net::TCPClient::run()
 {
 	m_thread = std::thread([this]() {m_context.run(); });
@@ -24,6 +29,7 @@ void net::TCPClient::run()
 void net::TCPClient::stop()
 {
 	m_context.stop();
+	m_session->disconnect();
 	if (m_thread.joinable())
 		m_thread.join();
 	std::cout << "Client stopped" << std::endl;
