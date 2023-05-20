@@ -44,6 +44,36 @@ void net::TCPClient::popFrontMessage()
 	m_inMessages.popFront();
 }
 
+void net::TCPClient::sendMessage(std::shared_ptr<Message> message)
+{
+	auto size = m_outMessages.addMessage(message);
+	if (size == 1)
+		sendMessage();
+}
+
+void net::TCPClient::sendMessage()
+{
+	assert(!m_outMessages.empty());
+	auto message = m_outMessages.getFront();
+
+	auto callback = [this](boost::system::error_code ec, std::size_t bytesWritten)
+	{
+		if (ec)
+		{
+			std::cout << "Error occured while writing message: " << ec.what() << std::endl;
+			sendMessage(); // TODO maybe handle the error somehow? Currently try to send message again
+			return;
+		}
+		std::cout << "Sent " << bytesWritten << " bytes." << std::endl;
+
+		auto newSize = m_outMessages.popFront();
+		if (newSize > 0)
+			sendMessage();
+	};
+
+	m_session->writeMessage(message, callback);
+}
+
 void net::TCPClient::connectTo(const tcp::resolver::results_type& endpoints)
 {
 	auto self(shared_from_this());

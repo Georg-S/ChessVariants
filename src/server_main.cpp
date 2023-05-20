@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
 	myServer->start();
 
 	bool doOnce = true;
-	std::string test = "Hallo Welt!";
+	std::string test = "Ping!";
 	auto message = std::make_shared<net::Message>(static_cast<uint32_t>(2), (void*)test.c_str(), static_cast<uint32_t>(test.size() + 1));
 
 	while (true) 
@@ -23,6 +23,7 @@ int main(int argc, char* argv[])
 			doOnce = false;
 			myServer->sendMessage(message);
 		}
+
 	}
 
 	return 0;

@@ -25,8 +25,10 @@ namespace net
 		size_t getMessageCount() const;
 		std::shared_ptr<Message> getFirstMessage();
 		void popFrontMessage();
+		void sendMessage(std::shared_ptr<Message> message);
 
 	private:
+		void sendMessage();
 		void connectTo(const tcp::resolver::results_type& endpoints);
 
 		std::string m_ip;
@@ -36,5 +38,6 @@ namespace net
 		std::shared_ptr<Session> m_session;
 		std::shared_ptr<tcp::socket> m_socket;
 		MessageQueue m_inMessages;
+		MessageQueue m_outMessages;
 	};
 }
