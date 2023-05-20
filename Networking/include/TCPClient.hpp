@@ -27,7 +27,7 @@ namespace net
 		void popFrontMessage();
 
 	private:
-		void do_connect(const tcp::resolver::results_type& endpoints);
+		void connectTo(const tcp::resolver::results_type& endpoints);
 
 		std::string m_ip;
 		std::thread m_thread;

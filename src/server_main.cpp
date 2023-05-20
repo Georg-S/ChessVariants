@@ -14,17 +14,16 @@ int main(int argc, char* argv[])
 
 	bool doOnce = true;
 	std::string test = "Hallo Welt!";
-	auto message = std::make_shared<net::Message>(static_cast<uint32_t>(1), (void*)test.c_str(), static_cast<uint32_t>(test.size() + 1));
+	auto message = std::make_shared<net::Message>(static_cast<uint32_t>(2), (void*)test.c_str(), static_cast<uint32_t>(test.size() + 1));
 
 	while (true) 
 	{
 		if (myServer->getCountOfConnectedClients() && doOnce) 
 		{
 			doOnce = false;
-			myServer->writeMessageToClient(message, 1);
+			myServer->sendMessage(message);
 		}
 	}
-
 
 	return 0;
 }

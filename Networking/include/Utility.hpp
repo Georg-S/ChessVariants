@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <functional>
 #include <thread>
 #include <iostream>
 #include <deque>
@@ -25,9 +26,10 @@ namespace net
 	public:
 		MessageQueue() = default;
 		size_t getSize() const;
-		void addMessage(std::shared_ptr<Message> message);
+		size_t addMessage(std::shared_ptr<Message> message); // Returns the size after adding the message
 		std::shared_ptr<Message> getFront();
-		void popFront();
+		size_t popFront();
+		bool empty() const;
 
 	private:
 		mutable std::mutex m_mut;
@@ -41,9 +43,10 @@ namespace net
 		Session(std::shared_ptr<tcp::socket> socket, MessageQueue* messageQueue);
 		Session(std::shared_ptr<tcp::socket> socket, size_t id, MessageQueue* messageQueue);
 		void start();
-		void read_header();
-		void read_body();
-		void do_write(std::shared_ptr<Message> message);
+		void readHeader();
+		void readBody();
+		void writeMessage(std::shared_ptr<Message> message, std::function<void(boost::system::error_code, std::size_t)> callBack);
+		bool isConnected() const;
 
 		std::shared_ptr<tcp::socket> m_socket;
 		size_t m_id;

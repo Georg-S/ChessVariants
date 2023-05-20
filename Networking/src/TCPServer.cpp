@@ -7,7 +7,7 @@ net::TCPServer::TCPServer(std::string ip, uint16_t port)
 	if (ec)
 		std::cout << "Error creating acceptor: " << ec.what();
 
-	do_accept();
+	acceptConnection();
 }
 
 net::TCPServer::~TCPServer()
@@ -28,21 +28,63 @@ void net::TCPServer::stop()
 	std::cout << "Server stopped" << std::endl;
 }
 
-void net::TCPServer::writeMessageToClient(std::shared_ptr<Message> message, uint32_t clientId)
-{
-	for (auto& session : m_sessions) 
-	{
-		if (session->m_id == clientId)
-			session->do_write(message);
-	}
-}
-
 size_t net::TCPServer::getCountOfConnectedClients() const
 {
 	return m_sessions.size();
 }
 
-void net::TCPServer::do_accept()
+void net::TCPServer::sendMessage(std::shared_ptr<Message> message)
+{
+	auto size = m_outMessages.addMessage(message);
+	if (size == 1)
+		sendMessage();
+}
+
+void net::TCPServer::sendMessage()
+{
+	assert(!m_outMessages.empty());
+	auto message = m_outMessages.getFront();
+
+	if (message->header.id == SERVER)
+		std::cout << "Message sent from server to server ... do nothing" << std::endl;
+	else
+		writeMessageToClient(message);
+}
+
+void net::TCPServer::writeMessageToClient(std::shared_ptr<Message> message)
+{
+	for (auto& session : m_sessions)
+	{
+		if (session->m_id == message->header.id)
+		{
+			sendMessage(message, session.get());
+			return;
+		}
+	}
+	std::cout << "Message could not be sent, client not found " << std::endl;
+}
+
+void net::TCPServer::sendMessage(std::shared_ptr<Message> message, Session* session)
+{
+	auto callback = [this](boost::system::error_code ec, std::size_t bytesWritten)
+	{
+		if (ec)
+		{
+			std::cout << "Error occured while writing message: " << ec.what() << std::endl;
+			sendMessage(); // TODO maybe handle the error somehow? Currently try to send message again
+			return;
+		}
+		std::cout << "Sent " << bytesWritten << " bytes." << std::endl;
+
+		auto newSize = m_outMessages.popFront();
+		if (newSize > 0)
+			sendMessage();
+	};
+
+	session->writeMessage(message, callback);
+}
+
+void net::TCPServer::acceptConnection()
 {
 	m_acceptor->async_accept(
 		[this](boost::system::error_code ec, tcp::socket socket)
@@ -52,14 +94,14 @@ void net::TCPServer::do_accept()
 			if (ec)
 			{
 				std::cout << "Connection failed with error code: " << ec.what() << std::endl;
-				do_accept();
+				acceptConnection();
 				return;
 			}
 
 			std::cout << m_sessionId << " connected to server" << std::endl;
 			m_sessions.emplace_back(std::make_shared<Session>(socketPtr, m_sessionId++, &this->m_inMessages));
-			m_sessions.back()->read_header();
+			m_sessions.back()->readHeader();
 
-			do_accept();
+			acceptConnection();
 		});
 }

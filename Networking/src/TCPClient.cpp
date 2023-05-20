@@ -13,7 +13,7 @@ void net::TCPClient::connect()
 {
 	auto resolver = tcp::resolver(m_context);
 	auto endPoints = resolver.resolve(m_ip, std::to_string(m_port));
-	do_connect(endPoints);
+	connectTo(endPoints);
 }
 
 void net::TCPClient::run()
@@ -44,7 +44,7 @@ void net::TCPClient::popFrontMessage()
 	m_inMessages.popFront();
 }
 
-void net::TCPClient::do_connect(const tcp::resolver::results_type& endpoints)
+void net::TCPClient::connectTo(const tcp::resolver::results_type& endpoints)
 {
 	auto self(shared_from_this());
 	boost::asio::async_connect(*m_socket, endpoints,
@@ -59,6 +59,6 @@ void net::TCPClient::do_connect(const tcp::resolver::results_type& endpoints)
 			std::cout << "Connected to server" << std::endl;
 
 			self->m_session = std::make_shared<Session>(self->m_socket, &self->m_inMessages);
-			self->m_session->read_header();
+			self->m_session->readHeader();
 		});
 }

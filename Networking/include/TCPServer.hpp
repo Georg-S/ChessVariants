@@ -13,7 +13,6 @@ namespace net
 {
 	using boost::asio::ip::tcp;
 
-	// Derive from this class to create a server for your application
 	class TCPServer
 	{
 	public:
@@ -21,18 +20,22 @@ namespace net
 		virtual ~TCPServer();
 		void start();
 		void stop();
-		void writeMessageToClient(std::shared_ptr<Message> message, uint32_t clientId);
 		size_t getCountOfConnectedClients() const;
+		void sendMessage(std::shared_ptr<Message> message);
 
 	private:
-		void do_accept();
+		void sendMessage();
+		void writeMessageToClient(std::shared_ptr<Message> message);
+		void sendMessage(std::shared_ptr<Message> message, Session* session);
+		void acceptConnection();
 
-		static constexpr uint32_t SessionStartId = 1;
+		static constexpr uint32_t SessionStartId = 2;
 		boost::asio::io_context m_context;
 		std::vector<std::shared_ptr<Session>> m_sessions;
 		std::unique_ptr<tcp::acceptor> m_acceptor;
 		std::thread m_thread;
 		uint32_t m_sessionId = SessionStartId;
 		MessageQueue m_inMessages;
+		MessageQueue m_outMessages;
 	};
 }

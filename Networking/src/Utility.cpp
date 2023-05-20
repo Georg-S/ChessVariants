@@ -8,9 +8,11 @@ size_t net::MessageQueue::getSize() const
 	return m_messages.size();
 }
 
-void net::MessageQueue::addMessage(std::shared_ptr<Message> message)
+size_t net::MessageQueue::addMessage(std::shared_ptr<Message> message)
 {
+	std::scoped_lock lock(m_mut);
 	m_messages.emplace_back(message);
+	return m_messages.size();
 }
 
 std::shared_ptr<Message> net::MessageQueue::getFront()
@@ -22,12 +24,20 @@ std::shared_ptr<Message> net::MessageQueue::getFront()
 	return m_messages.front();
 }
 
-void net::MessageQueue::popFront()
+size_t net::MessageQueue::popFront()
 {
 	std::scoped_lock lock(m_mut);
 
 	if (!m_messages.empty())
 		m_messages.pop_front();
+
+	return m_messages.size();
+}
+
+bool net::MessageQueue::empty() const
+{
+	std::scoped_lock lock(m_mut);
+	return m_messages.empty();
 }
 
 net::Session::Session(std::shared_ptr<tcp::socket> socket, MessageQueue* messageQueue)
@@ -46,10 +56,10 @@ net::Session::Session(std::shared_ptr<tcp::socket> socket, size_t id, MessageQue
 
 void net::Session::start()
 {
-	read_header();
+	readHeader();
 }
 
-void net::Session::read_header()
+void net::Session::readHeader()
 {
 	m_currentMessageHeader = {};
 	auto self(shared_from_this());
@@ -63,11 +73,11 @@ void net::Session::read_header()
 				return;
 			}
 
-			self->read_body();
+			self->readBody();
 		});
 }
 
-void net::Session::read_body()
+void net::Session::readBody()
 {
 	auto resMessage = std::make_shared<Message>(m_currentMessageHeader);
 
@@ -83,23 +93,43 @@ void net::Session::read_body()
 			}
 
 			self->m_messageQueue->addMessage(resMessage);
-			self->read_header();
+			self->readHeader();
 		});
 }
 
-void net::Session::do_write(std::shared_ptr<Message> message)
+void net::Session::writeMessage(std::shared_ptr<Message> message, std::function<void(boost::system::error_code, std::size_t)> callBack)
 {
 	auto self = shared_from_this();
 
-	boost::asio::async_write(*m_socket, boost::asio::buffer(message->getMessageStart(), message->messageSize()),
-		[self](boost::system::error_code ec, size_t bytesTansferred)
-		{
-			if (ec)
-			{
-				std::cout << "Error occured while writing message: " << ec.what() << std::endl;
-				return;
-			}
+	//if (ec)
+	//{
+	//	std::cout << "Error occured while writing message: " << ec.what() << std::endl;
+	//	return;
+	//}
 
-			std::cout << "Sent " << bytesTansferred << " bytes." << std::endl;
-		});
+	//std::cout << "Sent " << bytesTansferred << " bytes." << std::endl;
+
+	boost::asio::async_write(*m_socket, boost::asio::buffer(message->getMessageStart(), message->messageSize()), callBack);
+}
+
+//void net::Session::writeMessage(std::shared_ptr<Message> message)
+//{
+//	auto self = shared_from_this();
+//
+//	boost::asio::async_write(*m_socket, boost::asio::buffer(message->getMessageStart(), message->messageSize()),
+//		[self](boost::system::error_code ec, size_t bytesTansferred)
+//		{
+//			if (ec)
+//			{
+//				std::cout << "Error occured while writing message: " << ec.what() << std::endl;
+//				return;
+//			}
+//
+//			std::cout << "Sent " << bytesTansferred << " bytes." << std::endl;
+//		});
+//}
+
+bool net::Session::isConnected() const
+{
+	return m_socket->is_open();
 }
