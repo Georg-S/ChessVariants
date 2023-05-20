@@ -36,7 +36,7 @@ namespace net
 	{
 	public:
 		Session(std::shared_ptr<tcp::socket> socket, MessageQueue* messageQueue);
-		Session(std::shared_ptr<tcp::socket> socket, size_t id, MessageQueue* messageQueue);
+		Session(std::shared_ptr<tcp::socket> socket, uint32_t id, MessageQueue* messageQueue);
 		~Session();
 		void start();
 		void readHeader();
@@ -46,7 +46,7 @@ namespace net
 		bool isConnected() const;
 
 		std::shared_ptr<tcp::socket> m_socket;
-		size_t m_id;
+		uint32_t m_id;
 		MessageQueue* m_messageQueue;
 		Message::Header m_currentMessageHeader = {};
 	};

@@ -57,9 +57,10 @@ void net::TCPClient::popFrontMessage()
 
 void net::TCPClient::sendMessage(std::shared_ptr<Message> message)
 {
+	auto self(shared_from_this());
 	auto size = m_outMessages.addMessage(message);
 	if (size == 1)
-		sendMessage();
+		boost::asio::post(m_context, [self]() {self->sendMessage(); });
 }
 
 void net::TCPClient::sendMessage()
@@ -71,11 +72,11 @@ void net::TCPClient::sendMessage()
 	{
 		if (ec)
 		{
-			std::cout << "Error occured while writing message: " << ec.what() << std::endl;
-			sendMessage(); // TODO maybe handle the error somehow? Currently try to send message again
+			std::cout << "Error occured while writing message ... closing socket: " << ec.what() << std::endl;
+			m_session->disconnect(); // For now if we encounter an error while writing a message ... disconnect
 			return;
 		}
-		std::cout << "Sent " << bytesWritten << " bytes." << std::endl;
+		//std::cout << "Sent " << bytesWritten << " bytes." << std::endl;
 
 		auto newSize = m_outMessages.popFront();
 		if (newSize > 0)

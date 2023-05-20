@@ -59,7 +59,7 @@ net::Session::Session(std::shared_ptr<tcp::socket> socket, MessageQueue* message
 {
 }
 
-net::Session::Session(std::shared_ptr<tcp::socket> socket, size_t id, MessageQueue* messageQueue)
+net::Session::Session(std::shared_ptr<tcp::socket> socket, uint32_t id, MessageQueue* messageQueue)
 	: m_socket(socket)
 	, m_id(id)
 	, m_messageQueue(messageQueue)

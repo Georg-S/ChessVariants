@@ -24,7 +24,7 @@ void net::TCPServer::stop()
 {
 	m_context.stop();
 
-	for (auto& session : m_sessions)
+	for (auto& [id, session] : m_sessions)
 		session->disconnect();
 	m_sessions.clear();
 
@@ -48,17 +48,33 @@ void net::TCPServer::sendMessage(std::shared_ptr<Message> message)
 {
 	auto size = m_outMessages.addMessage(message);
 	if (size == 1)
-		sendMessage();
+		boost::asio::post(m_context, [this]() {sendMessage(); });
 }
 
-void net::TCPServer::broadcastMessage(std::shared_ptr<Message> message)
+void net::TCPServer::broadcastMessage(std::shared_ptr<Message> message, std::initializer_list<uint32_t> ignoreIDs)
 {
-	for (auto& session : m_sessions) 
-	{
-		auto newMessage = std::make_shared<Message>(*message);
-		newMessage->setToID(session->m_id);
-		sendMessage(newMessage);
-	}
+	boost::asio::post(m_context, [this, ignoreIDs, message]()
+		{
+			for (auto& [id, session] : m_sessions)
+			{
+				bool ignoreMessage = false;
+				for (auto reference : ignoreIDs)
+				{
+					if (reference == session->m_id)
+					{
+						ignoreMessage = true;
+						break;
+					}
+				}
+				if (ignoreMessage)
+					continue;
+
+				auto newMessage = std::make_shared<Message>(*message);
+				newMessage->setToID(session->m_id);
+				sendMessage(newMessage);
+			}
+		}
+	);
 }
 
 void net::TCPServer::sendMessage()
@@ -74,24 +90,14 @@ void net::TCPServer::sendMessage()
 
 void net::TCPServer::writeMessageToClient(std::shared_ptr<Message> message)
 {
-	for (size_t i = 0; i < m_sessions.size(); i++)
+	auto iter = m_sessions.find(message->header.toID);
+	if (iter == m_sessions.end())
 	{
-		auto& session = m_sessions[i];
-		if (session->m_id == message->header.toID)
-		{
-			if (session->isConnected()) 
-			{
-				sendMessage(message, session);
-			}
-			else 
-			{
-				std::cout << "Connection lost to client: " << session->m_id << std::endl;
-				m_sessions.erase(m_sessions.begin() + i);
-			}
-			return;
-		}
+		std::cout << "Message could not be sent, client not found " << std::endl;
+		return;
 	}
-	std::cout << "Message could not be sent, client not found " << std::endl;
+
+	sendMessage(message, iter->second);
 }
 
 void net::TCPServer::sendMessage(std::shared_ptr<Message> message, std::shared_ptr<Session> session)
@@ -103,9 +109,12 @@ void net::TCPServer::sendMessage(std::shared_ptr<Message> message, std::shared_p
 		{
 			std::cout << "Error occured while writing message ... closing session: " << ec.what() << std::endl;
 			session->disconnect();
-			return;
+			cleanupConnection();
 		}
-		std::cout << "Sent " << bytesWritten << " bytes." << std::endl;
+		else
+		{
+			std::cout << "Sent " << bytesWritten << " bytes." << std::endl;
+		}
 
 		if (newQueueSize > 0)
 			sendMessage();
@@ -129,9 +138,26 @@ void net::TCPServer::acceptConnection()
 			}
 
 			std::cout << m_sessionId << " connected to server" << std::endl;
-			m_sessions.emplace_back(std::make_shared<Session>(socketPtr, m_sessionId++, &this->m_inMessages));
-			m_sessions.back()->readHeader();
+
+			auto newSession = std::make_shared<Session>(socketPtr, m_sessionId, &this->m_inMessages);
+			m_sessions[m_sessionId] = newSession;
+			newSession->readHeader();
+			++m_sessionId;
 
 			acceptConnection();
+		});
+}
+
+void net::TCPServer::cleanupConnection()
+{
+	boost::asio::post(m_context, [this]()
+		{
+			for (auto it = m_sessions.begin(); it != m_sessions.end();)
+			{
+				if (!it->second->isConnected())
+					it = m_sessions.erase(it);
+				else
+					++it;
+			}
 		});
 }
