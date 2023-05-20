@@ -39,6 +39,11 @@ std::shared_ptr<Message> net::TCPClient::getFirstMessage()
 	return m_inMessages.getFront();
 }
 
+std::shared_ptr<Message> net::TCPClient::getAndRemoveFirstMessage()
+{
+	return m_inMessages.getAndRemoveFirstMessage();
+}
+
 void net::TCPClient::popFrontMessage()
 {
 	m_inMessages.popFront();

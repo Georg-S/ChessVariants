@@ -13,19 +13,19 @@ int main(int argc, char* argv[])
 	client->connect();
 	client->run();
 
+	std::string test = "Pong!";
+	auto outMessage = std::make_shared<net::Message>(static_cast<uint32_t>(0), (void*)test.c_str(), static_cast<uint32_t>(test.size() + 1));
+
 	while (true) 
 	{
-		if (client->getMessageCount() > 0)
+		Sleep(10);
+		auto message = client->getAndRemoveFirstMessage();
+		if (message)
 		{
-			auto msg = client->getFirstMessage();
-			client->popFrontMessage();
-
-			std::string strMessage = std::string((const char*)msg->getBodyStart(), msg->bodySize());
+			std::string strMessage = std::string((const char*)message->getBodyStart(), message->bodySize());
 			std::cout << strMessage << std::endl;
-		}
-		else 
-		{
-			Sleep(10);
+
+			client->sendMessage(outMessage);
 		}
 	}
 

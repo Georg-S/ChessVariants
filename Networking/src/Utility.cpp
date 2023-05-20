@@ -24,6 +24,18 @@ std::shared_ptr<Message> net::MessageQueue::getFront()
 	return m_messages.front();
 }
 
+std::shared_ptr<Message> net::MessageQueue::getAndRemoveFirstMessage()
+{
+	std::scoped_lock lock(m_mut);
+	if (m_messages.empty())
+		return nullptr;
+
+	auto message = m_messages.front();
+	m_messages.pop_front();
+
+	return message;
+}
+
 size_t net::MessageQueue::popFront()
 {
 	std::scoped_lock lock(m_mut);

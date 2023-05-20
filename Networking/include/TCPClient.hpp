@@ -24,6 +24,7 @@ namespace net
 		void stop();
 		size_t getMessageCount() const;
 		std::shared_ptr<Message> getFirstMessage();
+		std::shared_ptr<Message> getAndRemoveFirstMessage();
 		void popFrontMessage();
 		void sendMessage(std::shared_ptr<Message> message);
 

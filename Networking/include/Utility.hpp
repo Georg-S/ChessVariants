@@ -28,6 +28,7 @@ namespace net
 		size_t getSize() const;
 		size_t addMessage(std::shared_ptr<Message> message); // Returns the size after adding the message
 		std::shared_ptr<Message> getFront();
+		std::shared_ptr<Message> getAndRemoveFirstMessage(); // Return nullptr if empty
 		size_t popFront();
 		bool empty() const;
 

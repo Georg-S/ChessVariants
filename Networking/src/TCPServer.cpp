@@ -33,6 +33,11 @@ size_t net::TCPServer::getCountOfConnectedClients() const
 	return m_sessions.size();
 }
 
+std::shared_ptr<net::Message> net::TCPServer::getAndRemoveFirstMessage()
+{
+	return m_inMessages.getAndRemoveFirstMessage();
+}
+
 void net::TCPServer::sendMessage(std::shared_ptr<Message> message)
 {
 	auto size = m_outMessages.addMessage(message);

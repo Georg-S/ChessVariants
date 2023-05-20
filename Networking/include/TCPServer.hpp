@@ -21,6 +21,7 @@ namespace net
 		void start();
 		void stop();
 		size_t getCountOfConnectedClients() const;
+		std::shared_ptr<Message> getAndRemoveFirstMessage();
 		void sendMessage(std::shared_ptr<Message> message);
 
 	private:
