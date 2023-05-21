@@ -21,7 +21,9 @@ static void sendMessage(std::shared_ptr<net::TCPClient> client)
 
 int main(int argc, char* argv[])
 {
-	auto client = std::make_shared<net::TCPClient>("127.0.0.1", 2345);
+	std::string ip = "127.0.0.1";
+	uint16_t port = 2345;
+	auto client = std::make_shared<net::TCPClient>(ip, port);
 	client->connect();
 	client->run();
 

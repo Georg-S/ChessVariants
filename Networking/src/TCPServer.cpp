@@ -34,6 +34,11 @@ void net::TCPServer::stop()
 	std::cout << "Server stopped" << std::endl;
 }
 
+void net::TCPServer::setMaxAllowedConnections(uint32_t maxAllowedConnections)
+{
+	m_maxAllowedConnections = maxAllowedConnections;
+}
+
 size_t net::TCPServer::getCountOfConnectedClients() const
 {
 	return m_sessions.size();
@@ -134,6 +139,14 @@ void net::TCPServer::acceptConnection()
 			{
 				std::cout << "Connection failed with error code: " << ec.what() << std::endl;
 				acceptConnection();
+				return;
+			}
+
+			if (m_maxAllowedConnections && (m_sessions.size() >= *m_maxAllowedConnections)) 
+			{
+				std::cout << "Connection denied, because maximum size of allowed clients is reached" << std::endl;
+				socketPtr->close();
+				acceptConnection(); // Still allow further connections, because a client might disconnect and someone else can take its place
 				return;
 			}
 

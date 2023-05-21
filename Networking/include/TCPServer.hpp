@@ -1,7 +1,9 @@
 #pragma once
+#include <optional>
 #include <memory>
 #include <map>
 #include <thread>
+#include <optional>
 #include <iostream>
 #include <boost/asio.hpp>
 #include <boost/asio/ts/buffer.hpp>
@@ -21,6 +23,7 @@ namespace net
 		virtual ~TCPServer();
 		void start();
 		void stop();
+		void setMaxAllowedConnections(uint32_t maxAllowedConnections);
 		size_t getCountOfConnectedClients() const;
 		std::shared_ptr<Message> getAndRemoveFirstMessage();
 		void sendMessage(std::shared_ptr<Message> message);
@@ -40,6 +43,7 @@ namespace net
 		std::thread m_thread;
 		std::mutex m_sessionMut;
 		uint32_t m_sessionId = SessionStartId;
+		std::optional<uint32_t> m_maxAllowedConnections;
 		MessageQueue m_inMessages;
 		MessageQueue m_outMessages;
 	};

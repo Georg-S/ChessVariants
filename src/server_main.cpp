@@ -9,7 +9,10 @@ using namespace boost;
 
 int main(int argc, char* argv[])
 {
-	auto myServer = std::make_unique<net::TCPServer>("127.0.0.1", 2345);
+	std::string ip = "0.0.0.0";
+	uint16_t port = 2345;
+	auto myServer = std::make_unique<net::TCPServer>(ip, port);
+	myServer->setMaxAllowedConnections(2);
 	myServer->start();
 
 	while (true) 
