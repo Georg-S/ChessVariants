@@ -55,14 +55,12 @@ bool net::MessageQueue::empty() const
 net::Session::Session(std::shared_ptr<tcp::socket> socket, MessageQueue* messageQueue)
 	: m_socket(socket)
 	, m_id(SERVER)
-	, m_messageQueue(messageQueue)
 {
 }
 
 net::Session::Session(std::shared_ptr<tcp::socket> socket, uint32_t id, MessageQueue* messageQueue)
 	: m_socket(socket)
 	, m_id(id)
-	, m_messageQueue(messageQueue)
 {
 }
 
@@ -71,60 +69,10 @@ net::Session::~Session()
 	disconnect();
 }
 
-void net::Session::start()
-{
-	readHeader();
-}
-
-void net::Session::readHeader()
-{
-	m_currentMessageHeader = {};
-	auto self(shared_from_this());
-	boost::asio::async_read(*m_socket,
-		boost::asio::buffer(&m_currentMessageHeader, Message::headerSize()),
-		[self](boost::system::error_code ec, size_t bytesRead)
-		{
-			if (ec)
-			{
-				std::cout << "Error reading message header ... closing socket: " << ec.what();
-				self->m_socket->close();
-				return;
-			}
-
-			self->readBody();
-		});
-}
-
-void net::Session::readBody()
-{
-	auto resMessage = std::make_shared<Message>(m_currentMessageHeader);
-
-	auto self(shared_from_this());
-	boost::asio::async_read(*m_socket,
-		boost::asio::buffer(resMessage->getBodyStart(), resMessage->bodySize()),
-		[self, resMessage](boost::system::error_code ec, std::size_t bytesRead)
-		{
-			if (ec)
-			{
-				std::cout << "Error reading message body ... closing socket: " << ec.what();
-				self->m_socket->close();
-				return;
-			}
-
-			self->m_messageQueue->addMessage(resMessage);
-			self->readHeader();
-		});
-}
-
 void net::Session::disconnect()
 {
 	if (m_socket->is_open())
 		m_socket->close();
-}
-
-void net::Session::writeMessage(std::shared_ptr<Message> message, std::function<void(boost::system::error_code, std::size_t)> callBack)
-{
-	boost::asio::async_write(*m_socket, boost::asio::buffer(message->getMessageStart(), message->messageSize()), callBack);
 }
 
 bool net::Session::isConnected() const

@@ -34,6 +34,8 @@ namespace net
 		void writeMessageToClient(std::shared_ptr<Message> message);
 		void sendMessage(std::shared_ptr<Message> message, std::shared_ptr<Session> session);
 		void acceptConnection();
+		void readHeader(std::shared_ptr<Session> session);
+		void readBody(std::shared_ptr<Session> session, std::shared_ptr<Message> unfinishedMessage);
 		void cleanupConnection();
 
 		static constexpr uint32_t SessionStartId = 2;
@@ -41,7 +43,6 @@ namespace net
 		std::map<uint32_t, std::shared_ptr<Session>> m_sessions;
 		std::unique_ptr<tcp::acceptor> m_acceptor;
 		std::thread m_thread;
-		std::mutex m_sessionMut;
 		uint32_t m_sessionId = SessionStartId;
 		std::optional<uint32_t> m_maxAllowedConnections;
 		MessageQueue m_inMessages;

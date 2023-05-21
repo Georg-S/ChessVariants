@@ -29,8 +29,10 @@ namespace net
 		void sendMessage(std::shared_ptr<Message> message);
 
 	private:
-		void sendMessage();
 		void connectTo(const tcp::resolver::results_type& endpoints);
+		void readHeader();
+		void readBody(std::shared_ptr<Message> unfinishedMessage);
+		void sendMessage();
 
 		std::string m_ip;
 		std::thread m_thread;

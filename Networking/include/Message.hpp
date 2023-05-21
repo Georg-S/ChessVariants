@@ -19,9 +19,10 @@ namespace net
 			uint32_t messageType;
 			uint32_t bodySize;
 		};
-		Header header;
+		Header header = {};
 		std::vector<uint8_t> dataBuffer;
 
+		Message() = default; // Resize should be called once the header is set
 		Message(Header header)
 			: header(std::move(header))
 		{
@@ -35,6 +36,13 @@ namespace net
 			header.bodySize = dataSize;
 			allocateAndInitializeBuffer();
 			memcpy_s(getBodyStart(), header.bodySize, data, dataSize);
+		}
+
+		// Resizes the buffer according to the headersize and the buffersize specified in the header
+		// Zeroes out the complete body memory
+		void resize() 
+		{
+			allocateAndInitializeBuffer();
 		}
 
 		void setToID(uint32_t toID) 

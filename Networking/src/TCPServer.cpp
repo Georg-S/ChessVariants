@@ -5,7 +5,7 @@ net::TCPServer::TCPServer(std::string ip, uint16_t port)
 	boost::system::error_code ec;
 	m_acceptor = std::make_unique<tcp::acceptor>(m_context, tcp::endpoint(boost::asio::ip::make_address(ip, ec), port));
 	if (ec)
-		std::cout << "Error creating acceptor: " << ec.what();
+		std::cout << "Error creating acceptor: " << std::endl << ec.what() << std::endl;
 
 	acceptConnection();
 }
@@ -107,25 +107,24 @@ void net::TCPServer::writeMessageToClient(std::shared_ptr<Message> message)
 
 void net::TCPServer::sendMessage(std::shared_ptr<Message> message, std::shared_ptr<Session> session)
 {
-	auto callback = [this, session](boost::system::error_code ec, std::size_t bytesWritten)
-	{
-		auto newQueueSize = m_outMessages.popFront();
-		if (ec)
+	boost::asio::async_write(*session->m_socket, boost::asio::buffer(message->getMessageStart(), message->messageSize()),
+		[this, session](boost::system::error_code ec, std::size_t bytesWritten)
 		{
-			std::cout << "Error occured while writing message ... closing session: " << ec.what() << std::endl;
-			session->disconnect();
-			cleanupConnection();
-		}
-		else
-		{
-			std::cout << "Sent " << bytesWritten << " bytes." << std::endl;
-		}
+			auto newQueueSize = m_outMessages.popFront();
+			if (ec)
+			{
+				std::cout << "Error occured while writing message ... closing session: " << std::endl << ec.what() << std::endl;
+				session->disconnect();
+				cleanupConnection();
+			}
+			else
+			{
+				//std::cout << "Sent " << bytesWritten << " bytes." << std::endl;
+			}
 
-		if (newQueueSize > 0)
-			sendMessage();
-	};
-
-	session->writeMessage(message, callback);
+			if (newQueueSize > 0)
+				sendMessage();
+		});
 }
 
 void net::TCPServer::acceptConnection()
@@ -137,12 +136,12 @@ void net::TCPServer::acceptConnection()
 
 			if (ec)
 			{
-				std::cout << "Connection failed with error code: " << ec.what() << std::endl;
+				std::cout << "Connection failed with error code: " << std::endl << ec.what() << std::endl;
 				acceptConnection();
 				return;
 			}
 
-			if (m_maxAllowedConnections && (m_sessions.size() >= *m_maxAllowedConnections)) 
+			if (m_maxAllowedConnections && (m_sessions.size() >= *m_maxAllowedConnections))
 			{
 				std::cout << "Connection denied, because maximum size of allowed clients is reached" << std::endl;
 				socketPtr->close();
@@ -151,13 +150,51 @@ void net::TCPServer::acceptConnection()
 			}
 
 			std::cout << m_sessionId << " connected to server" << std::endl;
-
 			auto newSession = std::make_shared<Session>(socketPtr, m_sessionId, &this->m_inMessages);
 			m_sessions[m_sessionId] = newSession;
-			newSession->readHeader();
+			readHeader(newSession);
+
 			++m_sessionId;
 
 			acceptConnection();
+		});
+}
+
+void net::TCPServer::readHeader(std::shared_ptr<Session> session)
+{
+	auto currentMessage = std::make_shared<Message>();
+	boost::asio::async_read(*session->m_socket, boost::asio::buffer(&currentMessage->header, Message::headerSize()),
+		[this, session, currentMessage](boost::system::error_code ec, size_t bytesRead)
+		{
+			if (ec)
+			{
+				std::cout << "Error reading message header ... closing session: " << std::endl << ec.what() << std::endl;
+				session->disconnect();
+				cleanupConnection();
+				return;
+			}
+			currentMessage->resize();
+
+			readBody(session, currentMessage);
+		}
+	);
+}
+
+void net::TCPServer::readBody(std::shared_ptr<Session> session, std::shared_ptr<Message> unfinishedMessage)
+{
+	boost::asio::async_read(*session->m_socket, boost::asio::buffer(unfinishedMessage->getBodyStart(), unfinishedMessage->bodySize()),
+		[this, session, unfinishedMessage](boost::system::error_code ec, size_t bytesRead)
+		{
+			if (ec)
+			{
+				std::cout << "Error reading message body ... closing session: " << std::endl << ec.what() << std::endl;
+				session->disconnect();
+				cleanupConnection();
+				return;
+			}
+			m_inMessages.addMessage(unfinishedMessage);
+
+			readHeader(session);
 		});
 }
 

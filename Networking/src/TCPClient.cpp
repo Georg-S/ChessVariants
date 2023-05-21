@@ -63,44 +63,80 @@ void net::TCPClient::sendMessage(std::shared_ptr<Message> message)
 		boost::asio::post(m_context, [self]() {self->sendMessage(); });
 }
 
-void net::TCPClient::sendMessage()
-{
-	assert(!m_outMessages.empty());
-	auto message = m_outMessages.getFront();
-
-	auto callback = [this](boost::system::error_code ec, std::size_t bytesWritten)
-	{
-		if (ec)
-		{
-			std::cout << "Error occured while writing message ... closing socket: " << ec.what() << std::endl;
-			m_session->disconnect(); // For now if we encounter an error while writing a message ... disconnect
-			return;
-		}
-		//std::cout << "Sent " << bytesWritten << " bytes." << std::endl;
-
-		auto newSize = m_outMessages.popFront();
-		if (newSize > 0)
-			sendMessage();
-	};
-
-	m_session->writeMessage(message, callback);
-}
-
 void net::TCPClient::connectTo(const tcp::resolver::results_type& endpoints)
 {
 	auto self(shared_from_this());
 	boost::asio::async_connect(*m_socket, endpoints,
-		[self] (boost::system::error_code ec, tcp::endpoint tcpEndpoint) mutable
+		[self](boost::system::error_code ec, tcp::endpoint tcpEndpoint) mutable
 		{
 			if (ec)
 			{
-				std::cout << "Connecting to server failed: " << ec.what();
+				std::cout << "Connecting to server failed: " << std::endl << ec.what() << std::endl;
 				return;
 			}
 
 			std::cout << "Connected to server" << std::endl;
 
 			self->m_session = std::make_shared<Session>(self->m_socket, &self->m_inMessages);
-			self->m_session->readHeader();
+			self->readHeader();
+		});
+}
+
+void net::TCPClient::readHeader()
+{
+	auto self = TCPClient::shared_from_this();
+	auto currentMessage = std::make_shared<Message>();
+	boost::asio::async_read(*m_session->m_socket, boost::asio::buffer(&currentMessage->header, Message::headerSize()),
+		[self, currentMessage](boost::system::error_code ec, size_t bytesRead)
+		{
+			if (ec)
+			{
+				std::cout << "Error reading message header ... closing session: " << std::endl << ec.what() << std::endl;
+				self->m_session->disconnect();
+				return;
+			}
+			currentMessage->resize();
+
+			self->readBody(currentMessage);
+		}
+	);
+}
+
+void net::TCPClient::readBody(std::shared_ptr<Message> unfinishedMessage)
+{
+	auto self = TCPClient::shared_from_this();
+	boost::asio::async_read(*m_session->m_socket, boost::asio::buffer(unfinishedMessage->getBodyStart(), unfinishedMessage->bodySize()),
+		[self, unfinishedMessage](boost::system::error_code ec, size_t bytesRead)
+		{
+			if (ec)
+			{
+				std::cout << "Error reading message body ... closing session: " << std::endl << ec.what() << std::endl;
+				self->m_session->disconnect();
+				return;
+			}
+			self->m_inMessages.addMessage(unfinishedMessage);
+			self->readHeader();
+		});
+}
+
+void net::TCPClient::sendMessage()
+{
+	assert(!m_outMessages.empty());
+	auto message = m_outMessages.getFront();
+
+	boost::asio::async_write(*m_socket, boost::asio::buffer(message->getMessageStart(), message->messageSize()),
+		[this](boost::system::error_code ec, std::size_t bytesWritten)
+		{
+			if (ec)
+			{
+				std::cout << "Error occured while writing message ... closing socket: " << std::endl << ec.what() << std::endl;
+				m_session->disconnect(); // For now if we encounter an error while writing a message ... disconnect
+				return;
+			}
+			//std::cout << "Sent " << bytesWritten << " bytes." << std::endl;
+
+			auto newSize = m_outMessages.popFront();
+			if (newSize > 0)
+				sendMessage();
 		});
 }
