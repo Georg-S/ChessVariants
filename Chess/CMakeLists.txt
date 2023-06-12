@@ -2,13 +2,12 @@ cmake_minimum_required(VERSION 3.15)
 project(Chess)
 set(CMAKE_CXX_STANDARD 17)
 
-set(HEADER
-	"include/GameLogic.hpp"
-	"include/Board.hpp"
-	"include/Renderer.hpp"
-	"include/Utility.hpp"
+set(SDL_HEADER
 	"include/SDL/Mouse.hpp"
 	"include/SDL/SDLHandler.hpp"
+	)
+
+set(PIECES_HEADER
 	"include/Pieces/Piece.hpp"
 	"include/Pieces/Bishop.hpp"
 	"include/Pieces/King.hpp"
@@ -18,13 +17,19 @@ set(HEADER
 	"include/Pieces/Rook.hpp"
 	)
 
-set(SOURCE
-	"src/GameLogic.cpp"
-	"src/Board.cpp"
-	"src/Utility.cpp"
-	"src/Renderer.cpp"
+set(CHESS_HEADER
+	"include/GameLogic.hpp"
+	"include/Board.hpp"
+	"include/Renderer.hpp"
+	"include/Utility.hpp"
+	)
+	
+set(SDL_SOURCE
 	"src/SDL/Mouse.cpp"
 	"src/SDL/SDLHandler.cpp"
+	)
+	
+set(PIECES_SOURCE
 	"src/Pieces/Piece.cpp"
 	"src/Pieces/Bishop.cpp"
 	"src/Pieces/King.cpp"
@@ -34,7 +39,28 @@ set(SOURCE
 	"src/Pieces/Rook.cpp"
 	)
 
-#source_group("\\Pieces" FILES ${Pieces})
+set(CHESS_SOURCE
+	"src/GameLogic.cpp"
+	"src/Board.cpp"
+	"src/Utility.cpp"
+	"src/Renderer.cpp"
+	)
+	
+set(HEADER
+	${PIECES_HEADER}
+	${SDL_HEADER}
+	${CHESS_HEADER}
+	)
+	
+set(SOURCE
+	${PIECES_SOURCE}
+	${SDL_SOURCE}
+	${CHESS_SOURCE}
+	)
+	
+source_group("\\Chess\\Pieces" FILES ${PIECES_HEADER} ${PIECES_SOURCE})
+source_group("\\SDL2" FILES ${SDL_HEADER} ${SDL_SOURCE})
+source_group("\\Chess" FILES ${CHESS_HEADER} ${CHESS_SOURCE})
 
 add_library(Chess STATIC 
 	${HEADER}
