@@ -17,9 +17,14 @@ namespace chess
 		Board() = default;
 		Board(const std::string& fenString);
 		void loadBoardStateFromFenString(const std::string& fenString);
-		std::string getFenString() const;
+		std::string getFenString(PieceColor currentPlayer);
+		std::array<std::unique_ptr<Piece>, BOARD_HEIGHT>& operator[](int x);
+		const std::array<std::unique_ptr<Piece>, BOARD_HEIGHT>& operator[](int x) const;
 
 	private:
+		std::string getPiecesFenString() const;
+		std::string getCastlingFenString() const;
+		std::string getEnPassantFenString() const;
 		void setPiecesFromFenString(const std::string& piecesFen);
 		void setCastlingFromFenString(const std::string& castlingFen);
 		void setEnPassantFromFenString(const std::string& enPassantFen);

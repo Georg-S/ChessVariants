@@ -3,12 +3,17 @@
 #include <ctype.h>
 #include <cassert>
 
-Piece::Piece(PieceColor color)
+chess::Piece::Piece(PieceColor color)
 	: m_pieceColor(color)
 {
 }
 
-char Piece::getFenPieceCharacter(char character) const
+chess::PieceColor chess::Piece::getColor() const
+{
+	return m_pieceColor;
+}
+
+char chess::Piece::getFenPieceCharacter(char character) const
 {
 	if (m_pieceColor == PieceColor::WHITE)
 		return toupper(character);

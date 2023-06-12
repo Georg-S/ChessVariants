@@ -41,6 +41,12 @@ if (MSVC)
                         COMMAND ${CMAKE_COMMAND} -E copy_if_different
                         ${SDL2_IMAGE_DLLS}
                         $<TARGET_FILE_DIR:ChessServer>)
+						
+	add_custom_command(TARGET ChessServer
+						POST_BUILD
+						COMMAND ${CMAKE_COMMAND} -E copy_directory
+						"${CMAKE_SOURCE_DIR}/Images"
+						"$<TARGET_FILE_DIR:ChessServer>/Images")
 		
 	add_custom_command(TARGET ChessClient
 					POST_BUILD
@@ -54,4 +60,10 @@ if (MSVC)
                         COMMAND ${CMAKE_COMMAND} -E copy_if_different
                         ${SDL2_IMAGE_DLLS}
                         $<TARGET_FILE_DIR:ChessClient>)
+	
+	add_custom_command(TARGET ChessClient
+						POST_BUILD
+						COMMAND ${CMAKE_COMMAND} -E copy_directory
+						"${CMAKE_SOURCE_DIR}/Images"
+						"$<TARGET_FILE_DIR:ChessClient>/Images")
 endif (MSVC)

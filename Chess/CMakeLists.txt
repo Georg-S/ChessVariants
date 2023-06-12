@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(HEADER
 	"include/GameLogic.hpp"
 	"include/Board.hpp"
+	"include/Renderer.hpp"
 	"include/Utility.hpp"
 	"include/SDL/Mouse.hpp"
 	"include/SDL/SDLHandler.hpp"
@@ -21,6 +22,7 @@ set(SOURCE
 	"src/GameLogic.cpp"
 	"src/Board.cpp"
 	"src/Utility.cpp"
+	"src/Renderer.cpp"
 	"src/SDL/Mouse.cpp"
 	"src/SDL/SDLHandler.cpp"
 	"src/Pieces/Piece.cpp"

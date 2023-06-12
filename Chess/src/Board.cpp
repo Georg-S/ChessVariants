@@ -33,9 +33,100 @@ void chess::Board::loadBoardStateFromFenString(const std::string& fenString)
 		setEnPassantFromFenString(splitted[3]);
 }
 
-std::string chess::Board::getFenString() const
+std::string chess::Board::getFenString(PieceColor currentPlayer)
 {
-	return std::string();
+	std::string playerString = "b";
+	if (currentPlayer == PieceColor::WHITE)
+		playerString = "w";
+
+	return getPiecesFenString() + " " + playerString + " " + getCastlingFenString() + " " + getEnPassantFenString();
+}
+
+std::array<std::unique_ptr<chess::Piece>, chess::BOARD_HEIGHT>& chess::Board::operator[](int x)
+{
+	return m_board[x];
+}
+
+const std::array<std::unique_ptr<chess::Piece>, chess::BOARD_HEIGHT>& chess::Board::operator[](int x) const
+{
+	return m_board[x];
+}
+
+
+std::string chess::Board::getPiecesFenString() const
+{
+	std::string result;
+	int counter = 0;
+
+	for (int y = 0; y < BOARD_HEIGHT; y++)
+	{
+		counter = 0;
+		for (int x = 0; x < BOARD_WIDTH; x++)
+		{
+			if (m_board[x][y])
+			{
+				if (counter)
+					result += std::to_string(counter);
+				counter = 0;
+				result += m_board[x][y]->getFenCharacter();
+			}
+			else
+			{
+				++counter;
+			}
+		}
+		if (counter)
+			result += std::to_string(counter);
+
+		if (y < (BOARD_HEIGHT - 1))
+			result += "/";
+	}
+
+	return result;
+}
+
+std::string chess::Board::getCastlingFenString() const
+{
+	std::string castlingString;
+	if (m_castlingPossible[7][7])
+		castlingString += 'K';
+	if (m_castlingPossible[0][7])
+		castlingString += 'Q';
+	if (m_castlingPossible[7][0])
+		castlingString += 'k';
+	if (m_castlingPossible[0][0])
+		castlingString += 'q';
+
+	if (castlingString.empty())
+		return "-";
+
+	return castlingString;
+}
+
+std::string chess::Board::getEnPassantFenString() const
+{
+	int xEnPassant = -1;
+	int yEnPassant = -1;
+	for (int y = 0; y < BOARD_HEIGHT; y++)
+	{
+		for (int x = 0; x < BOARD_WIDTH; x++)
+		{
+			if (m_enPassantPossible[x][y])
+			{
+				xEnPassant = x;
+				yEnPassant = y;
+			}
+		}
+	}
+
+	if (xEnPassant == -1 || yEnPassant == -1)
+		return "-";
+
+	yEnPassant = 8 - yEnPassant; // Convert from internal board coordinates to "official" coordinates
+	char column = 'a' + xEnPassant;
+	std::string rowStr = std::to_string(yEnPassant);
+
+	return column + rowStr;
 }
 
 void chess::Board::setPiecesFromFenString(const std::string& piecesFen)
@@ -93,7 +184,7 @@ void chess::Board::setEnPassantFromFenString(const std::string& enPassantFen)
 		m_enPassantPossible[x][y] = true;
 }
 
-std::unique_ptr<Piece> chess::Board::createPieceFromFenCharacter(char fenCharacter)
+std::unique_ptr<chess::Piece> chess::Board::createPieceFromFenCharacter(char fenCharacter)
 {
 	PieceColor color = PieceColor::BLACK;
 	if (isupper(fenCharacter))

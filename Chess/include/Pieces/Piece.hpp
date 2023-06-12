@@ -1,16 +1,20 @@
 #pragma once
 
-enum class PieceColor { WHITE, BLACK, NONE };
-
-class Piece
+namespace chess
 {
-public:
-	Piece(PieceColor color);
-	virtual ~Piece() = default;
-	virtual char getFenCharacter() const = 0;
+	enum class PieceColor { WHITE, BLACK, NONE };
 
-protected:
-	char getFenPieceCharacter(char character) const;
+	class Piece
+	{
+	public:
+		Piece(PieceColor color);
+		virtual ~Piece() = default;
+		virtual char getFenCharacter() const = 0;
+		PieceColor getColor() const;
 
-	PieceColor m_pieceColor = PieceColor::NONE;
-};
+	protected:
+		char getFenPieceCharacter(char character) const;
+
+		PieceColor m_pieceColor = PieceColor::NONE;
+	};
+}
