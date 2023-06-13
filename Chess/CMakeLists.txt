@@ -22,6 +22,7 @@ set(CHESS_HEADER
 	"include/Board.hpp"
 	"include/Renderer.hpp"
 	"include/Utility.hpp"
+	"include/Game.hpp"
 	)
 	
 set(SDL_SOURCE
@@ -44,6 +45,7 @@ set(CHESS_SOURCE
 	"src/Board.cpp"
 	"src/Utility.cpp"
 	"src/Renderer.cpp"
+	"src/Game.cpp"
 	)
 	
 set(HEADER

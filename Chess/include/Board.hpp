@@ -8,8 +8,21 @@
 
 namespace chess
 {
+	struct Position 
+	{
+		int x = -1;
+		int y = -1;
+	};
+
+	struct Move 
+	{
+		Position from = {};
+		Position to = {};
+	};
+
 	static constexpr int BOARD_WIDTH = 8;
 	static constexpr int BOARD_HEIGHT = 8;
+	static const std::string defaultStartPos = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 	class Board
 	{
