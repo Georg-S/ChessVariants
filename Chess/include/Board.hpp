@@ -4,25 +4,12 @@
 #include <vector>
 #include <memory>
 
+#include "Vec2D.hpp"
 #include "Pieces/Piece.hpp"
 
 namespace chess
 {
-	struct Position 
-	{
-		int x = -1;
-		int y = -1;
-
-		bool operator==(const Position& other) const
-		{
-			return x == other.x && y == other.y;
-		}
-
-		bool operator!=(const Position& other) const
-		{
-			return x != other.x || y != other.y;
-		}
-	};
+	using Position = Vec2D<int>;
 
 	struct Move 
 	{

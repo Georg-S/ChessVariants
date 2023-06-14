@@ -1,5 +1,7 @@
 #include "Pieces/Queen.hpp"
 
+#include "GameLogic.hpp"
+
 chess::Queen::Queen(PieceColor color)
     : Piece(color) 
 {
@@ -12,6 +14,5 @@ char chess::Queen::getFenCharacter() const
 
 bool chess::Queen::movePossible(const Board& board, const Move& move) const
 {
-    // TODO
-    return false;
+    return chess::directMovePossible(board, move);
 }

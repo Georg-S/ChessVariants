@@ -5,29 +5,28 @@ bool chess::directMovePossible(const Board& board, const Move& move)
     if (board[move.to] && (board[move.from]->getColor() == board[move.to]->getColor()))
         return false;
 
-    auto directionX = move.to.x - move.from.x;
-    auto directionY = move.to.y - move.from.y;
+    auto direction = move.to - move.from;
 
-    if (directionX && directionY) 
+    if (direction.x && direction.y) 
     {
-        if (abs(directionX) != abs(directionY))
+        if (abs(direction.x) != abs(direction.y))
             return false; // Piece does not move vertical, horizontal or diagonal.
     }
 
-    if (directionX)
-        directionX /= abs(directionX);
-    if (directionY)
-        directionY /= abs(directionY);
+    if (direction.x)
+        direction.x /= abs(direction.x);
+    if (direction.y)
+        direction.y /= abs(direction.y);
 
-    Position currentPos = { move.from.x + directionX, move.from.y + directionY };
+    Position currentPos = move.from;
+    currentPos += direction;
 
     while (currentPos != move.to) 
     {
         if (board[currentPos])
             return false;
 
-        currentPos.x += directionX;
-        currentPos.y += directionY;
+        currentPos += direction;
     }
 
     return true;

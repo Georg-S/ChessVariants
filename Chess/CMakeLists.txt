@@ -23,6 +23,7 @@ set(CHESS_HEADER
 	"include/Renderer.hpp"
 	"include/Utility.hpp"
 	"include/Game.hpp"
+	"include/Vec2D.hpp"
 	)
 	
 set(SDL_SOURCE
