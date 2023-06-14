@@ -39,22 +39,23 @@ void chess::Renderer::renderChessBoard()
 
 void chess::Renderer::renderPieces(const chess::Board& board)
 {
-	for (int x = 0; x < BOARD_WIDTH; x++)
+	Position pos = {};
+	for (pos.x = 0; pos.x < BOARD_WIDTH; pos.x++)
 	{
-		for (int y = 0; y < BOARD_HEIGHT; y++)
+		for (pos.y = 0; pos.y < BOARD_HEIGHT; pos.y++)
 		{
-			if (!board[x][y])
+			if (!board[pos])
 				continue;
 			
-			renderPiece(board[x][y]->getFenCharacter(), x, y);
+			renderPiece(board[pos]->getFenCharacter(), pos);
 		}
 	}
 }
 
-void chess::Renderer::renderPiece(char fenChar, int x, int y)
+void chess::Renderer::renderPiece(char fenChar, const Position& pos)
 {
 	std::string fileString = getPieceFileString(fenChar);
-	m_sdlHandler->createAndPushBackRenderElement(fileString, PIECE_WIDTH * x, PIECE_HEIGHT * y, PIECE_WIDTH, PIECE_HEIGHT);
+	m_sdlHandler->createAndPushBackRenderElement(fileString, PIECE_WIDTH * pos.x, PIECE_HEIGHT * pos.y, PIECE_WIDTH, PIECE_HEIGHT);
 }
 
 std::string chess::Renderer::getPieceFileString(char fenChar) const

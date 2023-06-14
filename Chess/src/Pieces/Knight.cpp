@@ -9,3 +9,8 @@ char chess::Knight::getFenCharacter() const
 {
     return getFenPieceCharacter('n');
 }
+
+bool chess::Knight::movePossible(const Board& board, const Move& move) const
+{
+    return false;
+}

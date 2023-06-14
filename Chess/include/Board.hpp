@@ -12,6 +12,16 @@ namespace chess
 	{
 		int x = -1;
 		int y = -1;
+
+		bool operator==(const Position& other) const
+		{
+			return x == other.x && y == other.y;
+		}
+
+		bool operator!=(const Position& other) const
+		{
+			return x != other.x || y != other.y;
+		}
 	};
 
 	struct Move 
@@ -31,8 +41,7 @@ namespace chess
 		Board(const std::string& fenString);
 		void loadBoardStateFromFenString(const std::string& fenString);
 		std::string getFenString(PieceColor currentPlayer);
-		std::array<std::unique_ptr<Piece>, BOARD_HEIGHT>& operator[](int x);
-		const std::array<std::unique_ptr<Piece>, BOARD_HEIGHT>& operator[](int x) const;
+		const Piece* operator[](const Position& pos) const;
 
 	private:
 		std::string getPiecesFenString() const;

@@ -22,7 +22,7 @@ namespace chess {
 	private:
 		void renderChessBoard();
 		void renderPieces(const chess::Board& board);
-		void renderPiece(char fenChar, int x, int y);
+		void renderPiece(char fenChar, const Position& pos);
 		//void render_pieces_with_selected_on_mouse_position(const RenderInformation& renderInfo);
 		//void render_previous_move(const ceg::Move& previousMove);
 		//void render_piece_on_mouse_position(char piece, int mouseX, int mouseY);

@@ -8,6 +8,6 @@ namespace chess
 	public:
 		Knight(PieceColor color);
 		char getFenCharacter() const override;
-
+		bool movePossible(const Board& board, const Move& move) const override;
 	};
 }

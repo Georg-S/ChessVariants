@@ -42,14 +42,9 @@ std::string chess::Board::getFenString(PieceColor currentPlayer)
 	return getPiecesFenString() + " " + playerString + " " + getCastlingFenString() + " " + getEnPassantFenString();
 }
 
-std::array<std::unique_ptr<chess::Piece>, chess::BOARD_HEIGHT>& chess::Board::operator[](int x)
+const chess::Piece* chess::Board::operator[](const Position& pos) const
 {
-	return m_board[x];
-}
-
-const std::array<std::unique_ptr<chess::Piece>, chess::BOARD_HEIGHT>& chess::Board::operator[](int x) const
-{
-	return m_board[x];
+	return m_board[pos.x][pos.y].get();
 }
 
 
