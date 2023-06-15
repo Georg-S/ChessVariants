@@ -16,3 +16,8 @@ bool chess::Queen::movePossible(const Board& board, const Move& move) const
 {
     return chess::directMovePossible(board, move);
 }
+
+std::unique_ptr<chess::Piece> chess::Queen::getDeepCopy() const
+{
+    return std::make_unique<Queen>(m_pieceColor);
+}

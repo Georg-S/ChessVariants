@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 namespace chess
 {
 	class Board;
@@ -14,6 +16,7 @@ namespace chess
 		virtual ~Piece() = default;
 		virtual char getFenCharacter() const = 0;
 		virtual bool movePossible(const Board& board, const Move& move) const = 0;
+		virtual std::unique_ptr<Piece> getDeepCopy() const = 0;
 		PieceColor getColor() const;
 
 	protected:

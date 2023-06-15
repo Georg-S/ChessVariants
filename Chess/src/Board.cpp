@@ -47,6 +47,33 @@ const chess::Piece* chess::Board::operator[](const Position& pos) const
 	return m_board[pos.x][pos.y].get();
 }
 
+bool chess::Board::hasSameColor(PieceColor color, const Position& pos) const
+{
+	auto piece = (*this)[pos];
+	if (!piece)
+		return false;
+
+	return color == piece->getColor();
+}
+
+chess::Board chess::Board::getDeepCopy() const
+{
+	Board copyBoard = {};
+	Position pos = {};
+	for (pos.x = 0; pos.x < BOARD_WIDTH; pos.x++) 
+	{
+		for (pos.y = 0; pos.y < BOARD_HEIGHT; pos.y++) 
+		{
+			const auto& piece = m_board[pos.x][pos.y];
+			if (!piece)
+				continue;
+
+			copyBoard.m_board[pos.x][pos.y] = piece->getDeepCopy();
+		}
+	}
+
+	return copyBoard;
+}
 
 std::string chess::Board::getPiecesFenString() const
 {

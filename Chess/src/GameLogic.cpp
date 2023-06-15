@@ -6,17 +6,18 @@ bool chess::directMovePossible(const Board& board, const Move& move)
         return false;
 
     auto direction = move.to - move.from;
+    const auto absDirection = abs(direction);
 
     if (direction.x && direction.y) 
     {
-        if (abs(direction.x) != abs(direction.y))
+        if (absDirection.x != absDirection.y)
             return false; // Piece does not move vertical, horizontal or diagonal.
     }
 
     if (direction.x)
-        direction.x /= abs(direction.x);
+        direction.x /= absDirection.x;
     if (direction.y)
-        direction.y /= abs(direction.y);
+        direction.y /= absDirection.y;
 
     Position currentPos = move.from;
     currentPos += direction;
@@ -30,6 +31,21 @@ bool chess::directMovePossible(const Board& board, const Move& move)
     }
 
     return true;
+}
+
+bool chess::movePossible(const Board& board, const Move& move)
+{
+    if (move.from == move.to)
+        return false;
+
+    auto piece = board[move.from];
+    if (!piece)
+        return false;
+
+    if (board.hasSameColor(piece->getColor(), move.to))
+        return false;
+
+    return piece->movePossible(board, move);
 }
 
 std::vector<chess::Move> chess::getAllMovesPossible(const Board& board, const Position& piecePosition)
@@ -46,11 +62,8 @@ std::vector<chess::Move> chess::getAllMovesPossible(const Board& board, const Po
     {
         for (toPos.y = 0; toPos.y < BOARD_HEIGHT; toPos.y++)
         {            
-            if (piecePosition == toPos)
-                continue;
-
             Move move = { piecePosition, toPos };
-            if (piece->movePossible(board, move))
+            if (movePossible(board, move))
                 result.emplace_back(std::move(move));
         }
     }

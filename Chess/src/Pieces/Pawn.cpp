@@ -15,3 +15,8 @@ bool chess::Pawn::movePossible(const Board& board, const Move& move) const
     // TODO
     return false;
 }
+
+std::unique_ptr<chess::Piece> chess::Pawn::getDeepCopy() const
+{
+    return std::make_unique<Pawn>(m_pieceColor);
+}

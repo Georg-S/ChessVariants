@@ -20,3 +20,8 @@ bool chess::Bishop::movePossible(const Board& board, const Move& move) const
 
 	return chess::directMovePossible(board, move);
 }
+
+std::unique_ptr<chess::Piece> chess::Bishop::getDeepCopy() const
+{
+	return std::make_unique<Bishop>(m_pieceColor);
+}

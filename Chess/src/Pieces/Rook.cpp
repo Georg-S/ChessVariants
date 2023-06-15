@@ -20,3 +20,8 @@ bool chess::Rook::movePossible(const Board& board, const Move& move) const
 
     return chess::directMovePossible(board, move);
 }
+
+std::unique_ptr<chess::Piece> chess::Rook::getDeepCopy() const
+{
+    return std::make_unique<Rook>(m_pieceColor);
+}
