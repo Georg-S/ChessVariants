@@ -56,6 +56,19 @@ bool chess::Board::hasSameColor(PieceColor color, const Position& pos) const
 	return color == piece->getColor();
 }
 
+bool chess::Board::enPassantPossible(const Position& position) const
+{
+	return m_enPassantPossible[position.x][position.y];
+}
+
+bool chess::Board::isOccupied(const Position& position) const
+{
+	if (m_board[position.x][position.y])
+		return true;
+
+	return false;
+}
+
 chess::Board chess::Board::getDeepCopy() const
 {
 	Board copyBoard = {};

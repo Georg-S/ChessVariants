@@ -30,6 +30,8 @@ namespace chess
 		std::string getFenString(PieceColor currentPlayer);
 		const Piece* operator[](const Position& pos) const;
 		bool hasSameColor(PieceColor color, const Position& pos) const;
+		bool enPassantPossible(const Position& position) const;
+		bool isOccupied(const Position& position) const;
 		Board getDeepCopy() const;
 
 	private:

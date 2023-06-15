@@ -10,5 +10,8 @@ namespace chess
 		char getFenCharacter() const override;
 		bool movePossible(const Board& board, const Move& move) const override;
 		virtual std::unique_ptr<Piece> getDeepCopy() const override;
+
+	private:
+		bool movePossible(const Board& board, const Move& move, int allowedYDirection, int twoMovesRow) const;
 	};
 }
