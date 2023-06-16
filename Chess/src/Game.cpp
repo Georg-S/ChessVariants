@@ -14,17 +14,26 @@ chess::Game::Game(const std::string& fenString)
 		m_currentPlayer = PieceColor::BLACK;
 }
 
-void chess::Game::update()
+bool chess::Game::update()
 {
-	m_renderer.renderBoard(m_board);
-	if (m_renderer.isQuit())
+	m_mouse.update();
+	m_renderInfo.board = m_board.getDeepCopy();
+	if (m_mouse.isRightPressed())
+		deselectPiece();
+
+	m_renderInfo.mousePos = { m_mouse.getMousePositionX(), m_mouse.getMousePositionY() };
+	m_renderer.render(m_renderInfo);
+	if (m_renderer.isQuit()) 
+	{
 		m_renderer.close();
+		return false;
+	}
+
+	return true;
 }
 
 std::optional<chess::Position> chess::Game::getSelectedPosition()
 {
-	m_mouse.update();
-
 	if (!m_mouse.isNewLeftClick())
 		return std::nullopt;
 
@@ -35,4 +44,17 @@ std::optional<chess::Position> chess::Game::getSelectedPosition()
 	result.y = mouseY / (WINDOW_HEIGHT / BOARD_HEIGHT);
 
 	return result;
+}
+
+void chess::Game::selectPiece(const Position& pos)
+{
+	if (m_board.isOccupied(pos))
+		m_renderInfo.positionToRenderOnMousePosition = pos;
+	else
+		m_renderInfo.positionToRenderOnMousePosition = {};
+}
+
+void chess::Game::deselectPiece()
+{
+	m_renderInfo.positionToRenderOnMousePosition = {};
 }

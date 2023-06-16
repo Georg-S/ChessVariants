@@ -27,10 +27,12 @@ namespace chess
 		Board() = default;
 		Board(const std::string& fenString);
 		void loadBoardStateFromFenString(const std::string& fenString);
-		std::string getFenString(PieceColor currentPlayer);
+		void movePiece(const Move& move);
+		std::string getFenString(PieceColor currentPlayer) const;
 		const Piece* operator[](const Position& pos) const;
 		bool hasSameColor(PieceColor color, const Position& pos) const;
 		bool enPassantPossible(const Position& position) const;
+		bool castlingPossible(const Position& position) const;
 		bool isOccupied(const Position& position) const;
 		Board getDeepCopy() const;
 

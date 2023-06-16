@@ -1,5 +1,72 @@
 #include "GameLogic.hpp"
 
+#include <cassert>
+#include <optional>
+
+using namespace chess;
+
+static bool isKing(const Piece* piece) 
+{
+    return tolower(piece->getFenCharacter()) == 'k';
+}
+
+static std::optional<Position> getKingPosition(const Board& board, PieceColor color) 
+{
+    Position pos = {};
+    for (pos.x = 0; pos.x < BOARD_WIDTH; pos.x++)
+    {
+        for (pos.y = 0; pos.y < BOARD_HEIGHT; pos.y++)
+        {
+            auto piece = board[pos];
+            if (!piece || color != piece->getColor())
+                continue;
+
+            if (isKing(piece))
+                return pos;
+        }
+    }
+
+    return std::nullopt;
+}
+
+void chess::makeMove(Board* inOutBoard, const Move& move)
+{
+}
+
+bool chess::isCheck(const Board& board, PieceColor color)
+{
+    auto kingPos = getKingPosition(board, color);
+    if (!kingPos) 
+    {
+        assert(!"King not found");
+        return false;
+    }
+
+    return isCheck(board, *kingPos);
+}
+
+bool chess::isCheck(const Board& board, const Position& kingPos)
+{
+    auto king = board[kingPos];
+    auto color = king->getColor();
+    Position pos = {};
+    for (pos.x = 0; pos.x < BOARD_WIDTH; pos.x++)
+    {
+        for (pos.y = 0; pos.y < BOARD_HEIGHT; pos.y++)
+        {
+            auto piece = board[pos];
+            if (!piece || color == piece->getColor())
+                continue;
+
+            const Move move = { pos, kingPos };
+            if (piece->movePossible(board, move))
+                return true;
+        }
+    }
+
+    return false;
+}
+
 bool chess::directMovePossible(const Board& board, const Move& move)
 {
     if (board[move.to] && (board[move.from]->getColor() == board[move.to]->getColor()))

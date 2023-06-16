@@ -25,6 +25,10 @@ std::unique_ptr<chess::Piece> chess::Pawn::getDeepCopy() const
     return std::make_unique<Pawn>(m_pieceColor);
 }
 
+void chess::Pawn::makeMove(chess::Board* inOutBoard, const Move& move) const
+{
+}
+
 bool chess::Pawn::movePossible(const Board& board, const Move& move, int allowedYDirection, int twoMovesRow) const
 {
     const auto diff = move.to - move.from;

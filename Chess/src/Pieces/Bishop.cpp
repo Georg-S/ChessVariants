@@ -25,3 +25,8 @@ std::unique_ptr<chess::Piece> chess::Bishop::getDeepCopy() const
 {
 	return std::make_unique<Bishop>(m_pieceColor);
 }
+
+void chess::Bishop::makeMove(chess::Board* inOutBoard, const Move& move) const
+{
+	inOutBoard->movePiece(move);
+}

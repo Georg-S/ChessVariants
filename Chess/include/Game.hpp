@@ -11,11 +11,14 @@ namespace chess
 	{
 	public:
 		Game(const std::string& fenString = defaultStartPos);
-		void update();
+		bool update(); // Returns true if the window is still open
 
 		std::optional<Position> getSelectedPosition();
+		void selectPiece(const Position& pos);
+		void deselectPiece();
 
 	private:
+		RenderInformation m_renderInfo;
 		PieceColor m_currentPlayer;
 		Board m_board;
 		Renderer m_renderer;

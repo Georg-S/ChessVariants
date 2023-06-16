@@ -7,8 +7,9 @@ namespace chess
 	{
 	public:
 		Rook(PieceColor color);
-		char getFenCharacter() const override;
-		bool movePossible(const Board& board, const Move& move) const override;
+		virtual char getFenCharacter() const override;
+		virtual bool movePossible(const Board& board, const Move& move) const override;
 		virtual std::unique_ptr<Piece> getDeepCopy() const override;
+		virtual void makeMove(chess::Board* inOutBoard, const Move& move) const override;
 	};
 }

@@ -25,3 +25,8 @@ std::unique_ptr<chess::Piece> chess::Rook::getDeepCopy() const
 {
     return std::make_unique<Rook>(m_pieceColor);
 }
+
+void chess::Rook::makeMove(chess::Board* inOutBoard, const Move& move) const
+{
+    inOutBoard->movePiece(move);
+}

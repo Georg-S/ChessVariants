@@ -33,7 +33,22 @@ void chess::Board::loadBoardStateFromFenString(const std::string& fenString)
 		setEnPassantFromFenString(splitted[3]);
 }
 
-std::string chess::Board::getFenString(PieceColor currentPlayer)
+void chess::Board::movePiece(const Move& move)
+{
+	auto& piece = m_board[move.from.x][move.from.y];
+	if (!piece) 
+	{
+		assert(!"Piece not found");
+		return;
+	}
+
+	if (move.from == move.to)
+		return;
+
+	m_board[move.to.x][move.to.y] = std::move(piece);
+}
+
+std::string chess::Board::getFenString(PieceColor currentPlayer) const
 {
 	std::string playerString = "b";
 	if (currentPlayer == PieceColor::WHITE)
@@ -61,6 +76,11 @@ bool chess::Board::enPassantPossible(const Position& position) const
 	return m_enPassantPossible[position.x][position.y];
 }
 
+bool chess::Board::castlingPossible(const Position& position) const
+{
+	return m_castlingPossible[position.x][position.y];
+}
+
 bool chess::Board::isOccupied(const Position& position) const
 {
 	if (m_board[position.x][position.y])
@@ -72,6 +92,9 @@ bool chess::Board::isOccupied(const Position& position) const
 chess::Board chess::Board::getDeepCopy() const
 {
 	Board copyBoard = {};
+	copyBoard.m_castlingPossible = m_castlingPossible;
+	copyBoard.m_enPassantPossible = m_enPassantPossible;
+
 	Position pos = {};
 	for (pos.x = 0; pos.x < BOARD_WIDTH; pos.x++) 
 	{
