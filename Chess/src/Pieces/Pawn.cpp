@@ -27,6 +27,28 @@ std::unique_ptr<chess::Piece> chess::Pawn::getDeepCopy() const
 
 void chess::Pawn::makeMove(chess::Board* inOutBoard, const Move& move) const
 {
+    const bool isEnPassantMove = inOutBoard->enPassantPossible(move.to);
+    inOutBoard->resetCastlingPossibility(move);
+    inOutBoard->resetEnPassantPossibility();
+
+    const auto diff = move.to - move.from;
+    const auto absDiff = abs(diff);
+
+    inOutBoard->movePiece(move);
+
+    Position moveDirection = { 0, -1 };
+    if (diff.y > 0)
+        moveDirection.y = 1;
+
+    if (!isEnPassantMove) 
+    {
+        if (absDiff.y == 2) 
+            inOutBoard->setEnPassantPossibility(move.to - moveDirection);
+
+        return;
+    }
+
+    inOutBoard->removePiece(move.to - moveDirection);
 }
 
 bool chess::Pawn::movePossible(const Board& board, const Move& move, int allowedYDirection, int twoMovesRow) const

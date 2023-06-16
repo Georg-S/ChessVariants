@@ -2,10 +2,18 @@
 
 #include <ctype.h>
 #include <cassert>
+#include "Board.hpp"
 
 chess::Piece::Piece(PieceColor color)
 	: m_pieceColor(color)
 {
+}
+
+void chess::Piece::makeMove(chess::Board* inOutBoard, const Move& move) const
+{
+	inOutBoard->movePiece(move);
+	inOutBoard->resetEnPassantPossibility();
+	inOutBoard->resetCastlingPossibility(move);
 }
 
 chess::PieceColor chess::Piece::getColor() const

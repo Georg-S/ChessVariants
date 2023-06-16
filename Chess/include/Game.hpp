@@ -13,9 +13,11 @@ namespace chess
 		Game(const std::string& fenString = defaultStartPos);
 		bool update(); // Returns true if the window is still open
 
-		std::optional<Position> getSelectedPosition();
+		std::optional<Position> getSelectedPosition() const;
 		void selectPiece(const Position& pos);
 		void deselectPiece();
+		bool isPieceSelected() const;
+		void makeMove(const Move& move);
 
 	private:
 		RenderInformation m_renderInfo;

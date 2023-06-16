@@ -30,8 +30,3 @@ std::unique_ptr<chess::Piece> chess::Knight::getDeepCopy() const
 {
     return std::make_unique<Knight>(m_pieceColor);
 }
-
-void chess::Knight::makeMove(chess::Board* inOutBoard, const Move& move) const
-{
-    inOutBoard->movePiece(move);
-}

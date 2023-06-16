@@ -2,10 +2,13 @@
 
 #include <cassert>
 #include "Utility.hpp"
+#include "GameLogic.hpp"
+
+using namespace chess;
 
 chess::Game::Game(const std::string& fenString)
 {
-	auto splitted = chess::stringSplit(fenString, " ");
+	auto splitted = stringSplit(fenString, " ");
 	assert(splitted.size() >= 2);
 	m_board = Board(fenString);
 
@@ -14,7 +17,7 @@ chess::Game::Game(const std::string& fenString)
 		m_currentPlayer = PieceColor::BLACK;
 }
 
-bool chess::Game::update()
+bool Game::update()
 {
 	m_mouse.update();
 	m_renderInfo.board = m_board.getDeepCopy();
@@ -32,7 +35,7 @@ bool chess::Game::update()
 	return true;
 }
 
-std::optional<chess::Position> chess::Game::getSelectedPosition()
+std::optional<Position> Game::getSelectedPosition() const
 {
 	if (!m_mouse.isNewLeftClick())
 		return std::nullopt;
@@ -46,7 +49,7 @@ std::optional<chess::Position> chess::Game::getSelectedPosition()
 	return result;
 }
 
-void chess::Game::selectPiece(const Position& pos)
+void Game::selectPiece(const Position& pos)
 {
 	if (m_board.isOccupied(pos))
 		m_renderInfo.positionToRenderOnMousePosition = pos;
@@ -54,7 +57,25 @@ void chess::Game::selectPiece(const Position& pos)
 		m_renderInfo.positionToRenderOnMousePosition = {};
 }
 
-void chess::Game::deselectPiece()
+void Game::deselectPiece()
 {
 	m_renderInfo.positionToRenderOnMousePosition = {};
+}
+
+bool Game::isPieceSelected() const
+{
+	if (m_renderInfo.positionToRenderOnMousePosition)
+		return true;
+
+	return false;
+}
+
+void Game::makeMove(const Move& move)
+{
+	deselectPiece();
+	if (!isMovePossible(m_board, move))
+		return;
+
+	::makeMove(&m_board, move);
+	m_renderInfo.previousMove = move;
 }

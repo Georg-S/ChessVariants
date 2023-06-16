@@ -35,6 +35,11 @@ namespace chess
 		bool castlingPossible(const Position& position) const;
 		bool isOccupied(const Position& position) const;
 		Board getDeepCopy() const;
+		void resetCastlingPossibility(const Move& move);
+		void resetCastlingPossibility(const Position& position);
+		void resetEnPassantPossibility();
+		void setEnPassantPossibility(const Position& position);
+		void removePiece(const Position& position);
 
 	private:
 		std::string getPiecesFenString() const;

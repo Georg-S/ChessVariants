@@ -17,7 +17,7 @@ namespace chess
 		virtual char getFenCharacter() const = 0;
 		virtual bool movePossible(const Board& board, const Move& move) const = 0;
 		virtual std::unique_ptr<Piece> getDeepCopy() const = 0;
-		virtual void makeMove(chess::Board* inOutBoard, const Move& move) const = 0;
+		virtual void makeMove(chess::Board* inOutBoard, const Move& move) const;
 		PieceColor getColor() const;
 
 	protected:

@@ -31,6 +31,14 @@ static std::optional<Position> getKingPosition(const Board& board, PieceColor co
 
 void chess::makeMove(Board* inOutBoard, const Move& move)
 {
+    auto piece = (*inOutBoard)[move.from];
+    if (!piece) 
+    {
+        assert(!"Invalid field selected");
+        return;
+    }
+
+    piece->makeMove(inOutBoard, move);
 }
 
 bool chess::isCheck(const Board& board, PieceColor color)
@@ -100,8 +108,28 @@ bool chess::directMovePossible(const Board& board, const Move& move)
     return true;
 }
 
-bool chess::movePossible(const Board& board, const Move& move)
+static bool isMoveInBoardRange(const Move& move) 
 {
+    if (move.from.x < 0 || move.from.x >= BOARD_WIDTH)
+        return false;
+    if (move.from.y < 0 || move.from.y >= BOARD_HEIGHT)
+        return false;
+    if (move.to.x < 0 || move.to.x >= BOARD_WIDTH)
+        return false;
+    if (move.to.y < 0 || move.to.y >= BOARD_HEIGHT)
+        return false;
+
+    return true;
+}
+
+bool chess::isMovePossible(const Board& board, const Move& move)
+{
+    if (!isMoveInBoardRange(move)) 
+    {
+        assert(!"Move out of range");
+        return false;
+    }
+
     if (move.from == move.to)
         return false;
 
@@ -109,15 +137,21 @@ bool chess::movePossible(const Board& board, const Move& move)
     if (!piece)
         return false;
 
-    if (board.hasSameColor(piece->getColor(), move.to))
+    const auto playerColor = piece->getColor();
+    if (board.hasSameColor(playerColor, move.to))
         return false;
 
-    return piece->movePossible(board, move);
+    if (!piece->movePossible(board, move))
+        return false;
+
+    auto copyBoard = board.getDeepCopy();
+    makeMove(&copyBoard, move);
+
+    return !isCheck(copyBoard, playerColor);
 }
 
 std::vector<chess::Move> chess::getAllMovesPossible(const Board& board, const Position& piecePosition)
 {
-    // TODO complete method, check for check etc.
     auto piece = board[piecePosition];
     if (!piece)
         return {};
@@ -130,7 +164,7 @@ std::vector<chess::Move> chess::getAllMovesPossible(const Board& board, const Po
         for (toPos.y = 0; toPos.y < BOARD_HEIGHT; toPos.y++)
         {            
             Move move = { piecePosition, toPos };
-            if (movePossible(board, move))
+            if (isMovePossible(board, move))
                 result.emplace_back(std::move(move));
         }
     }

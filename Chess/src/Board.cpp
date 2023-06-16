@@ -111,6 +111,35 @@ chess::Board chess::Board::getDeepCopy() const
 	return copyBoard;
 }
 
+void chess::Board::resetCastlingPossibility(const Move& move)
+{
+	resetCastlingPossibility(move.from);
+	resetCastlingPossibility(move.to);
+}
+
+void chess::Board::resetCastlingPossibility(const Position& position)
+{
+	m_castlingPossible[position.x][position.y] = false;
+}
+
+void chess::Board::resetEnPassantPossibility()
+{
+	for (int x = 0; x < BOARD_WIDTH; x++) 
+	{
+		std::fill(std::begin(m_enPassantPossible[x]), std::end(m_enPassantPossible[x]), false);
+	}
+}
+
+void chess::Board::setEnPassantPossibility(const Position& position)
+{
+	m_enPassantPossible[position.x][position.y] = true;
+}
+
+void chess::Board::removePiece(const Position& position)
+{
+	m_board[position.x][position.y] = nullptr;
+}
+
 std::string chess::Board::getPiecesFenString() const
 {
 	std::string result;
