@@ -2,26 +2,28 @@
 
 #include "GameLogic.hpp"
 
+using namespace chess;
+
 chess::Bishop::Bishop(PieceColor color)
 	: Piece(color)
 {
 }
 
-char chess::Bishop::getFenCharacter() const
+char Bishop::getFenCharacter() const
 {
 	return getFenPieceCharacter('b');
 }
 
-bool chess::Bishop::movePossible(const Board& board, const Move& move) const
+bool Bishop::movePossible(const Board& board, const Move& move) const
 {
 	auto direction = move.to - move.from;
 	if (abs(direction.x) != abs(direction.y))
 		return false;
 
-	return chess::directMovePossible(board, move);
+	return directMovePossible(board, move);
 }
 
-std::unique_ptr<chess::Piece> chess::Bishop::getDeepCopy() const
+std::unique_ptr<Piece> Bishop::getDeepCopy() const
 {
 	return std::make_unique<Bishop>(m_pieceColor);
 }

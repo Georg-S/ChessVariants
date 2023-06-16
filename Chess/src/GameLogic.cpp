@@ -150,7 +150,7 @@ bool chess::isMovePossible(const Board& board, const Move& move)
     return !isCheck(copyBoard, playerColor);
 }
 
-std::vector<chess::Move> chess::getAllMovesPossible(const Board& board, const Position& piecePosition)
+std::vector<Move> chess::getAllMovesPossible(const Board& board, const Position& piecePosition)
 {
     auto piece = board[piecePosition];
     if (!piece)

@@ -2,17 +2,19 @@
 
 #include "Board.hpp"
 
+using namespace chess;
+
 chess::Knight::Knight(PieceColor color)
     : Piece(color)
 {
 }
 
-char chess::Knight::getFenCharacter() const
+char Knight::getFenCharacter() const
 {
     return getFenPieceCharacter('n');
 }
 
-bool chess::Knight::movePossible(const Board& board, const Move& move) const
+bool Knight::movePossible(const Board& board, const Move& move) const
 {
     auto dif = move.from - move.to;
     const auto absDif = abs(dif);
@@ -26,7 +28,7 @@ bool chess::Knight::movePossible(const Board& board, const Move& move) const
     return true;
 }
 
-std::unique_ptr<chess::Piece> chess::Knight::getDeepCopy() const
+std::unique_ptr<Piece> Knight::getDeepCopy() const
 {
     return std::make_unique<Knight>(m_pieceColor);
 }

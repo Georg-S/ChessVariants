@@ -10,12 +10,14 @@
 #include "Pieces/Queen.hpp"
 #include "Pieces/Rook.hpp"
 
+using namespace chess;
+
 chess::Board::Board(const std::string& fenString)
 {
 	loadBoardStateFromFenString(fenString);
 }
 
-void chess::Board::loadBoardStateFromFenString(const std::string& fenString)
+void Board::loadBoardStateFromFenString(const std::string& fenString)
 {
 	auto splitted = stringSplit(fenString, " ");
 	assert(!splitted.empty());
@@ -33,7 +35,7 @@ void chess::Board::loadBoardStateFromFenString(const std::string& fenString)
 		setEnPassantFromFenString(splitted[3]);
 }
 
-void chess::Board::movePiece(const Move& move)
+void Board::movePiece(const Move& move)
 {
 	auto& piece = m_board[move.from.x][move.from.y];
 	if (!piece) 
@@ -48,7 +50,7 @@ void chess::Board::movePiece(const Move& move)
 	m_board[move.to.x][move.to.y] = std::move(piece);
 }
 
-std::string chess::Board::getFenString(PieceColor currentPlayer) const
+std::string Board::getFenString(PieceColor currentPlayer) const
 {
 	std::string playerString = "b";
 	if (currentPlayer == PieceColor::WHITE)
@@ -57,12 +59,12 @@ std::string chess::Board::getFenString(PieceColor currentPlayer) const
 	return getPiecesFenString() + " " + playerString + " " + getCastlingFenString() + " " + getEnPassantFenString();
 }
 
-const chess::Piece* chess::Board::operator[](const Position& pos) const
+const Piece* Board::operator[](const Position& pos) const
 {
 	return m_board[pos.x][pos.y].get();
 }
 
-bool chess::Board::hasSameColor(PieceColor color, const Position& pos) const
+bool Board::hasSameColor(PieceColor color, const Position& pos) const
 {
 	auto piece = (*this)[pos];
 	if (!piece)
@@ -71,17 +73,17 @@ bool chess::Board::hasSameColor(PieceColor color, const Position& pos) const
 	return color == piece->getColor();
 }
 
-bool chess::Board::enPassantPossible(const Position& position) const
+bool Board::enPassantPossible(const Position& position) const
 {
 	return m_enPassantPossible[position.x][position.y];
 }
 
-bool chess::Board::castlingPossible(const Position& position) const
+bool Board::castlingPossible(const Position& position) const
 {
 	return m_castlingPossible[position.x][position.y];
 }
 
-bool chess::Board::isOccupied(const Position& position) const
+bool Board::isOccupied(const Position& position) const
 {
 	if (m_board[position.x][position.y])
 		return true;
@@ -89,7 +91,7 @@ bool chess::Board::isOccupied(const Position& position) const
 	return false;
 }
 
-chess::Board chess::Board::getDeepCopy() const
+Board Board::getDeepCopy() const
 {
 	Board copyBoard = {};
 	copyBoard.m_castlingPossible = m_castlingPossible;
@@ -111,18 +113,18 @@ chess::Board chess::Board::getDeepCopy() const
 	return copyBoard;
 }
 
-void chess::Board::resetCastlingPossibility(const Move& move)
+void Board::resetCastlingPossibility(const Move& move)
 {
 	resetCastlingPossibility(move.from);
 	resetCastlingPossibility(move.to);
 }
 
-void chess::Board::resetCastlingPossibility(const Position& position)
+void Board::resetCastlingPossibility(const Position& position)
 {
 	m_castlingPossible[position.x][position.y] = false;
 }
 
-void chess::Board::resetEnPassantPossibility()
+void Board::resetEnPassantPossibility()
 {
 	for (int x = 0; x < BOARD_WIDTH; x++) 
 	{
@@ -130,17 +132,17 @@ void chess::Board::resetEnPassantPossibility()
 	}
 }
 
-void chess::Board::setEnPassantPossibility(const Position& position)
+void Board::setEnPassantPossibility(const Position& position)
 {
 	m_enPassantPossible[position.x][position.y] = true;
 }
 
-void chess::Board::removePiece(const Position& position)
+void Board::removePiece(const Position& position)
 {
 	m_board[position.x][position.y] = nullptr;
 }
 
-std::string chess::Board::getPiecesFenString() const
+std::string Board::getPiecesFenString() const
 {
 	std::string result;
 	int counter = 0;
@@ -172,7 +174,7 @@ std::string chess::Board::getPiecesFenString() const
 	return result;
 }
 
-std::string chess::Board::getCastlingFenString() const
+std::string Board::getCastlingFenString() const
 {
 	std::string castlingString;
 	if (m_castlingPossible[7][7])
@@ -190,7 +192,7 @@ std::string chess::Board::getCastlingFenString() const
 	return castlingString;
 }
 
-std::string chess::Board::getEnPassantFenString() const
+std::string Board::getEnPassantFenString() const
 {
 	int xEnPassant = -1;
 	int yEnPassant = -1;
@@ -216,11 +218,11 @@ std::string chess::Board::getEnPassantFenString() const
 	return column + rowStr;
 }
 
-void chess::Board::setPiecesFromFenString(const std::string& piecesFen)
+void Board::setPiecesFromFenString(const std::string& piecesFen)
 {
 	auto splitted = stringSplit(piecesFen, "/");
 
-	for (int y = 0; y < chess::BOARD_HEIGHT; y++)
+	for (int y = 0; y < BOARD_HEIGHT; y++)
 	{
 		int x_index = 0;
 		for (char c : splitted[y])
@@ -238,7 +240,7 @@ void chess::Board::setPiecesFromFenString(const std::string& piecesFen)
 
 }
 
-void chess::Board::setCastlingFromFenString(const std::string& castlingFen)
+void Board::setCastlingFromFenString(const std::string& castlingFen)
 {
 	for (char c : castlingFen)
 	{
@@ -254,7 +256,7 @@ void chess::Board::setCastlingFromFenString(const std::string& castlingFen)
 	}
 }
 
-void chess::Board::setEnPassantFromFenString(const std::string& enPassantFen)
+void Board::setEnPassantFromFenString(const std::string& enPassantFen)
 {
 	int x = -1;
 	int y = -1;
@@ -271,7 +273,7 @@ void chess::Board::setEnPassantFromFenString(const std::string& enPassantFen)
 		m_enPassantPossible[x][y] = true;
 }
 
-std::unique_ptr<chess::Piece> chess::Board::createPieceFromFenCharacter(char fenCharacter)
+std::unique_ptr<Piece> Board::createPieceFromFenCharacter(char fenCharacter)
 {
 	PieceColor color = PieceColor::BLACK;
 	if (isupper(fenCharacter))

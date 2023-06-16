@@ -3,25 +3,27 @@
 #include "Board.hpp"
 #include "GameLogic.hpp"
 
+using namespace chess;
+
 chess::Rook::Rook(PieceColor color)
     : Piece(color) 
 {
 }
 
-char chess::Rook::getFenCharacter() const
+char Rook::getFenCharacter() const
 {
     return getFenPieceCharacter('r');
 }
 
-bool chess::Rook::movePossible(const Board& board, const Move& move) const
+bool Rook::movePossible(const Board& board, const Move& move) const
 {
     if ((move.from.x != move.to.x) && (move.from.y != move.to.y))
         return false;
 
-    return chess::directMovePossible(board, move);
+    return directMovePossible(board, move);
 }
 
-std::unique_ptr<chess::Piece> chess::Rook::getDeepCopy() const
+std::unique_ptr<Piece> Rook::getDeepCopy() const
 {
     return std::make_unique<Rook>(m_pieceColor);
 }

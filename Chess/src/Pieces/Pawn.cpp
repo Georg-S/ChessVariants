@@ -2,17 +2,19 @@
 
 #include "Board.hpp"
 
+using namespace chess;
+
 chess::Pawn::Pawn(PieceColor color) 
     : Piece(color)
 {
 }
 
-char chess::Pawn::getFenCharacter() const
+char Pawn::getFenCharacter() const
 {
     return getFenPieceCharacter('p');
 }
 
-bool chess::Pawn::movePossible(const Board& board, const Move& move) const
+bool Pawn::movePossible(const Board& board, const Move& move) const
 {
     if (PieceColor::BLACK == m_pieceColor)
         return movePossible(board, move, 1, 1);
@@ -20,12 +22,12 @@ bool chess::Pawn::movePossible(const Board& board, const Move& move) const
     return movePossible(board, move, -1, 6);
 }
 
-std::unique_ptr<chess::Piece> chess::Pawn::getDeepCopy() const
+std::unique_ptr<Piece> Pawn::getDeepCopy() const
 {
     return std::make_unique<Pawn>(m_pieceColor);
 }
 
-void chess::Pawn::makeMove(chess::Board* inOutBoard, const Move& move) const
+void Pawn::makeMove(Board* inOutBoard, const Move& move) const
 {
     const bool isEnPassantMove = inOutBoard->enPassantPossible(move.to);
     inOutBoard->resetCastlingPossibility(move);
@@ -51,7 +53,7 @@ void chess::Pawn::makeMove(chess::Board* inOutBoard, const Move& move) const
     inOutBoard->removePiece(move.to - moveDirection);
 }
 
-bool chess::Pawn::movePossible(const Board& board, const Move& move, int allowedYDirection, int twoMovesRow) const
+bool Pawn::movePossible(const Board& board, const Move& move, int allowedYDirection, int twoMovesRow) const
 {
     const auto diff = move.to - move.from;
     const auto absDiff = abs(diff);

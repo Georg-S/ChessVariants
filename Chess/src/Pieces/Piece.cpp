@@ -4,24 +4,26 @@
 #include <cassert>
 #include "Board.hpp"
 
+using namespace chess;
+
 chess::Piece::Piece(PieceColor color)
 	: m_pieceColor(color)
 {
 }
 
-void chess::Piece::makeMove(chess::Board* inOutBoard, const Move& move) const
+void Piece::makeMove(Board* inOutBoard, const Move& move) const
 {
 	inOutBoard->movePiece(move);
 	inOutBoard->resetEnPassantPossibility();
 	inOutBoard->resetCastlingPossibility(move);
 }
 
-chess::PieceColor chess::Piece::getColor() const
+PieceColor Piece::getColor() const
 {
 	return m_pieceColor;
 }
 
-char chess::Piece::getFenPieceCharacter(char character) const
+char Piece::getFenPieceCharacter(char character) const
 {
 	if (m_pieceColor == PieceColor::WHITE)
 		return toupper(character);

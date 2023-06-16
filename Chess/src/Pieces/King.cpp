@@ -32,7 +32,7 @@ static Position getCastlingTowerPosition(PieceColor color, int xDirection)
 	return pos;
 }
 
-static void resetCastlingPossibilityForColor(chess::Board* board, PieceColor color)
+static void resetCastlingPossibilityForColor(Board* board, PieceColor color)
 {
 	Position towerPos1 = { 7, 7 };
 	Position towerPos2 = {0, 7};
@@ -86,7 +86,7 @@ std::unique_ptr<Piece> King::getDeepCopy() const
 	return std::make_unique<King>(m_pieceColor);
 }
 
-void chess::King::makeMove(chess::Board* inOutBoard, const Move& move) const
+void King::makeMove(Board* inOutBoard, const Move& move) const
 {
 	inOutBoard->resetEnPassantPossibility();
 	resetCastlingPossibilityForColor(inOutBoard, m_pieceColor);
