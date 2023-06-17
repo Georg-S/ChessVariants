@@ -7,6 +7,11 @@
 
 namespace chess
 {
+	enum class GAME_MODES
+	{
+		NORMAL, SWAP
+	};
+
 	class Game
 	{
 	public:

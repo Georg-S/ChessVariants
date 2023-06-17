@@ -3,13 +3,21 @@ project(SpecialChess)
 set(CMAKE_CXX_STANDARD 17)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-set(CHESS_SERVER_HEADERS "")
+set(CHESS_SERVER_HEADERS 
+	"include/ChessServer.hpp"
+	"include/Messages.hpp")
 
-set(CHESS_SERVER_SOURCES "src/server_main.cpp")
+set(CHESS_SERVER_SOURCES 
+	"src/ChessServer.cpp"
+	"src/server_main.cpp")
 
-set(CHESS_CLIENT_HEADERS "")
+set(CHESS_CLIENT_HEADERS 
+	"include/ChessClient.hpp"
+	"include/Messages.hpp")
 
-set(CHESS_CLIENT_SOURCES "src/client_main.cpp")
+set(CHESS_CLIENT_SOURCES 
+	"src/ChessClient.cpp"
+	"src/client_main.cpp")
 
 #source_group("" FILES ${miscFiles})
 
@@ -18,7 +26,7 @@ add_subdirectory(Chess)
 #Server
 add_executable(ChessServer ${CHESS_SERVER_HEADERS} ${CHESS_SERVER_SOURCES})
 target_include_directories(ChessServer PUBLIC "include")
-target_link_libraries(ChessServer Networking)
+target_link_libraries(ChessServer Networking Chess)
 #Client
 add_executable(ChessClient ${CHESS_CLIENT_HEADERS} ${CHESS_CLIENT_SOURCES})
 target_include_directories(ChessClient PUBLIC "include")

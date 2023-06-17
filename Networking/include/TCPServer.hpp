@@ -39,6 +39,7 @@ namespace net
 		void cleanupConnection();
 
 		static constexpr uint32_t SessionStartId = 2;
+		mutable std::mutex m_sessionMutex;
 		boost::asio::io_context m_context;
 		std::map<uint32_t, std::shared_ptr<Session>> m_sessions;
 		std::unique_ptr<tcp::acceptor> m_acceptor;

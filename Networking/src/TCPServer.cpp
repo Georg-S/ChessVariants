@@ -41,6 +41,7 @@ void net::TCPServer::setMaxAllowedConnections(uint32_t maxAllowedConnections)
 
 size_t net::TCPServer::getCountOfConnectedClients() const
 {
+	std::scoped_lock lock(m_sessionMutex);
 	return m_sessions.size();
 }
 
@@ -149,10 +150,17 @@ void net::TCPServer::acceptConnection()
 				return;
 			}
 
+			std::scoped_lock lock(m_sessionMutex);
 			std::cout << m_sessionId << " connected to server" << std::endl;
 			auto newSession = std::make_shared<Session>(socketPtr, m_sessionId, &this->m_inMessages);
 			m_sessions[m_sessionId] = newSession;
 			readHeader(newSession);
+
+			// Create and emplace a message so the user of the server knows, when a client has connected
+			auto message = std::make_shared<Message>();
+			message->header.messageType = NEW_CONNECTION;
+			message->header.toID = m_sessionId;
+			m_inMessages.addMessage(message);
 
 			++m_sessionId;
 
@@ -202,12 +210,23 @@ void net::TCPServer::cleanupConnection()
 {
 	boost::asio::post(m_context, [this]()
 		{
+			std::scoped_lock lock(m_sessionMutex);
 			for (auto it = m_sessions.begin(); it != m_sessions.end();)
 			{
-				if (!it->second->isConnected())
+				if (!it->second->isConnected()) 
+				{
 					it = m_sessions.erase(it);
-				else
+
+					// Create and emplace a message so the user of the server knows, when a client has disconnected
+					auto message = std::make_shared<Message>();
+					message->header.messageType = CONNECTION_CLOSED;
+					message->header.toID = m_sessionId;
+					m_inMessages.addMessage(message);
+				}
+				else 
+				{
 					++it;
+				}
 			}
 		});
 }

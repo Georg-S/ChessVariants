@@ -5,41 +5,60 @@
 #include <boost/asio/ts/internet.hpp>
 #include <TCPClient.hpp>
 
+#include <SDL/SDLHandler.hpp>
+#include <Board.hpp>
+#include <Renderer.hpp>
+#include <Game.hpp>
+#include <GameLogic.hpp>
+#include "ChessClient.hpp"
+
+
 using namespace boost;
 
-static void sendMessage(std::shared_ptr<net::TCPClient> client) 
-{
-	while (true) 
-	{
-		std::string myStr;
-		std::cin >> myStr;
-		auto outMessage = std::make_shared<net::Message>(static_cast<uint32_t>(0), static_cast<uint32_t>(0), (void*)myStr.c_str(), static_cast<uint32_t>(myStr.size() + 1));
-
-		client->sendMessage(outMessage);
-	}
-}
+#undef main
 
 int main(int argc, char* argv[])
 {
-	std::string ip = "127.0.0.1";
-	uint16_t port = 2345;
-	auto client = std::make_shared<net::TCPClient>(ip, port);
-	client->connect();
-	client->run();
+	//const std::string startPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+	//const std::string testPositionCanBeDeleted = "4k3/3pr3/8/4P3/8/8/8/R3K2R w KQ - 0 1";
 
-	auto inputThread = std::thread([client]() {sendMessage(client); });
+	//chess::Game game = chess::Game(testPositionCanBeDeleted);
 
-	while (true) 
-	{
-		auto message = client->getAndRemoveFirstMessage();
-		if (message)
-		{
-			std::string strMessage = std::string((const char*)message->getBodyStart(), message->bodySize());
-			std::cout << strMessage << std::endl;
-		}
-	}
+	//std::cout << std::is_trivial<chess::Board>::value << std::endl;
+	//std::cout << std::is_trivially_copyable<chess::Board>::value << std::endl;
 
-	inputThread.join();
+	//while (game.update()) 
+	//{
+	//	Sleep(1);
+
+	//	if (game.isInPromotion()) 
+	//	{
+	//		auto selectedPiece = game.getSelectedPromotionPosition();
+	//		if (selectedPiece)
+	//			game.selectPieceForPromotion(*selectedPiece);
+
+	//		continue;
+	//	}
+
+	//	auto selectedPosition = game.getSelectedBoardPosition();
+	//	if (!selectedPosition)
+	//		continue;
+
+	//	if (game.isPieceSelected()) 
+	//		game.makeMoveWithSelectedPiece(*selectedPosition);
+	//	else 
+	//		game.selectPiece(*selectedPosition);
+
+	//	//Sleep(1);
+	//	//game.update();
+	//	//auto pos = game.getSelectedPosition();
+	//	//if (pos) 
+	//	//	std::cout << "X: " << pos->x << " Y: " << pos->y << std::endl;
+
+	//}
+	ChessClient client = ChessClient();
+	client.run();
+
 
 	return 0;
 }
