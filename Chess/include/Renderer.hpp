@@ -13,6 +13,7 @@ namespace chess {
 	struct RenderInformation
 	{
 		chess::Board board;
+		std::optional<PieceColor> promotionSelectionColor;
 		std::optional<Position> positionToRenderOnMousePosition;
 		std::optional<Move> previousMove;
 		std::optional<Position> mousePos;
@@ -22,7 +23,6 @@ namespace chess {
 	{
 	public:
 		Renderer();
-		//void render_promotion_selection(chess::PieceColor color); TODO
 		void renderBoard(const std::string& fenBoardString);
 		void renderBoard(const chess::Board& board);
 		void render(const RenderInformation& renderInfo);
@@ -30,6 +30,7 @@ namespace chess {
 		void close();
 
 	private:
+		void renderNormalGameState(const RenderInformation& renderInfo);
 		void renderChessBoard();
 		void renderPieces(const chess::Board& board);
 		void renderPiece(char fenChar, const Position& pos);
@@ -37,8 +38,10 @@ namespace chess {
 		void renderPiecesWithSelectedOnMousePosition(const Board& board, const Position& mousePos, const Position& selectedPiece);
 		void render_piece_on_mouse_position(char piece, const Position& mousePos);
 		void renderAllPossibleMovesForSelectedPiece(const chess::Board& board, const chess::Position& selectedPos);
+		void render_promotion_selection(chess::PieceColor color);
 		//void render_checkmate();
 		//void render_stalemate();
+		std::string getPieceFileString(char pieceChar, PieceColor color) const;
 		std::string getPieceFileString(char fenChar) const;
 		std::string getPieceTypeString(char fenChar) const;
 		std::string getColorString(chess::PieceColor color) const;

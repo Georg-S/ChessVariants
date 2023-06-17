@@ -29,6 +29,18 @@ static std::optional<Position> getKingPosition(const Board& board, PieceColor co
     return std::nullopt;
 }
 
+PieceColor chess::getNextPlayer(PieceColor player) 
+{
+    assert(player != PieceColor::NONE);
+    if (player == PieceColor::WHITE)
+        return PieceColor::BLACK;
+    else if (player == PieceColor::BLACK)
+        return PieceColor::WHITE;
+
+    return PieceColor::NONE;
+}
+
+
 void chess::makeMove(Board* inOutBoard, const Move& move)
 {
     auto piece = (*inOutBoard)[move.from];
@@ -170,4 +182,38 @@ std::vector<Move> chess::getAllMovesPossible(const Board& board, const Position&
     }
 
     return result;
+}
+
+static std::optional<Position> getPromotionPawnPosition(const Board& board) 
+{
+    Position pos = { 0, 0 };
+    for (pos.x = 0; pos.x < BOARD_WIDTH; pos.x++)
+    {
+        for (pos.y = 0; pos.y < BOARD_HEIGHT; pos.y += 7)
+        {
+            auto piece = board[pos];
+            if (!piece)
+                continue;
+
+            char pieceType = tolower(piece->getFenCharacter());
+            if (pieceType == 'p')
+                return pos;
+        }
+    }
+    return std::nullopt;
+}
+
+std::optional<PieceColor> chess::getPromotionSelectionColor(const Board& board) 
+{
+    auto pos = getPromotionPawnPosition(board);
+    if (pos)
+        return board[*pos]->getColor();
+    return std::nullopt;
+}
+
+void chess::executePromotion(Board* inOutBoard, char selectedFenCharPiece) 
+{
+    auto pos = getPromotionPawnPosition(*inOutBoard);
+    assert(pos);
+    inOutBoard->replacePiece(*pos, selectedFenCharPiece);
 }

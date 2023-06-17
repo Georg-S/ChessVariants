@@ -142,6 +142,12 @@ void Board::removePiece(const Position& position)
 	m_board[position.x][position.y] = nullptr;
 }
 
+void chess::Board::replacePiece(const Position& position, char fenCharacter)
+{
+	assert(m_board[position.x][position.y]);
+	m_board[position.x][position.y] = createPieceFromFenCharacter(fenCharacter);
+}
+
 std::string Board::getPiecesFenString() const
 {
 	std::string result;

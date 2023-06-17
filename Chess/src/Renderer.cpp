@@ -28,20 +28,11 @@ void chess::Renderer::renderBoard(const chess::Board& board)
 void chess::Renderer::render(const RenderInformation& renderInfo)
 {
 	m_sdlHandler->clear();
-	renderChessBoard();
 
-	if (m_renderPreviousMove && renderInfo.previousMove)
-		renderPreviousMove(*renderInfo.previousMove);
-
-	if (renderInfo.positionToRenderOnMousePosition && renderInfo.mousePos)
-	{
-		renderPiecesWithSelectedOnMousePosition(renderInfo.board, *renderInfo.mousePos, *renderInfo.positionToRenderOnMousePosition);
-		renderAllPossibleMovesForSelectedPiece(renderInfo.board, *renderInfo.positionToRenderOnMousePosition);
-	}
+	if (renderInfo.promotionSelectionColor) 
+		render_promotion_selection(*renderInfo.promotionSelectionColor);
 	else 
-	{
-		renderPieces(renderInfo.board);
-	}
+		renderNormalGameState(renderInfo);
 
 	m_sdlHandler->update();
 }
@@ -54,6 +45,24 @@ bool chess::Renderer::isQuit() const
 void chess::Renderer::close()
 {
 	m_sdlHandler->close();
+}
+
+void chess::Renderer::renderNormalGameState(const RenderInformation& renderInfo)
+{
+	renderChessBoard();
+
+	if (m_renderPreviousMove && renderInfo.previousMove)
+		renderPreviousMove(*renderInfo.previousMove);
+
+	if (renderInfo.positionToRenderOnMousePosition && renderInfo.mousePos)
+	{
+		renderPiecesWithSelectedOnMousePosition(renderInfo.board, *renderInfo.mousePos, *renderInfo.positionToRenderOnMousePosition);
+		renderAllPossibleMovesForSelectedPiece(renderInfo.board, *renderInfo.positionToRenderOnMousePosition);
+	}
+	else
+	{
+		renderPieces(renderInfo.board);
+	}
 }
 
 void chess::Renderer::renderChessBoard()
@@ -126,6 +135,31 @@ void chess::Renderer::renderAllPossibleMovesForSelectedPiece(const chess::Board&
 		m_sdlHandler->createAndPushBackRenderElement(basePath + "PossibleMove.png", PIECE_WIDTH * move.to.x, 
 			PIECE_HEIGHT * move.to.y, PIECE_WIDTH, PIECE_HEIGHT);
 	}
+}
+
+void chess::Renderer::render_promotion_selection(chess::PieceColor color)
+{
+	m_sdlHandler->createAndPushBackRenderElement(basePath + "background.png", 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+	std::string queenStr = getPieceFileString('q', color);
+	std::string rookStr = getPieceFileString('r', color);
+	std::string knightStr = getPieceFileString('n', color);
+	std::string  bishopStr = getPieceFileString('b', color);
+
+	m_sdlHandler->createAndPushBackRenderElement(queenStr, 0, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+	m_sdlHandler->createAndPushBackRenderElement(rookStr, WINDOW_WIDTH / 2, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+	m_sdlHandler->createAndPushBackRenderElement(knightStr, 0, WINDOW_HEIGHT / 2, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+	m_sdlHandler->createAndPushBackRenderElement(bishopStr, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+}
+
+std::string chess::Renderer::getPieceFileString(char pieceChar, PieceColor color) const
+{
+	if (color == PieceColor::WHITE)
+		pieceChar = toupper(pieceChar);
+	else
+		pieceChar = tolower(pieceChar);
+
+	return getPieceFileString(pieceChar);
 }
 
 std::string chess::Renderer::getPieceFileString(char fenChar) const
