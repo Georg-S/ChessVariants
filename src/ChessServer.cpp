@@ -8,6 +8,7 @@ ChessServer::ChessServer()
 	// TODO read in the game mode from a file
 	m_gameMode = chess::GAME_MODES::NORMAL;
 
+	m_game = chess::Game(); // Todo handle different game modes etc.
 	m_server = std::make_unique<net::TCPServer>(ip, port);
 	m_server->setMaxAllowedConnections(MAX_ALLOWED_CONNECTIONS);
 }
@@ -25,7 +26,7 @@ void ChessServer::run()
 	}
 }
 
-void ChessServer::handleMessage(std::shared_ptr<net::Message> message)
+void ChessServer::handleMessage(std::shared_ptr<net::ServerMessage> message)
 {
 	const auto messageType = message->header.messageType;
 
@@ -49,6 +50,13 @@ void ChessServer::handleMessage(std::shared_ptr<net::Message> message)
 	{
 	case MESSAGETYPE::FEN_STRING: 
 	{
+		assert(!"Server shouldn't receive this message");
+		break;
+	}
+	case MESSAGETYPE::MAKE_MOVE: 
+	{
+		chess::Move move = *static_cast<const chess::Move*>(message->getBodyStart());
+		handleMove(message->fromID, move);
 		break;
 	}
 	default:
@@ -64,14 +72,38 @@ void ChessServer::handleMessage(std::shared_ptr<net::Message> message)
 	//}
 }
 
+void ChessServer::handleMove(uint32_t clientId, const chess::Move& move)
+{
+	assert(m_connectionIdToColor.find(clientId) != m_connectionIdToColor.end());
+	auto color = m_connectionIdToColor[clientId];
+	if (color != m_game.getCurrentPlayer())
+		return;
+
+	if (!m_game.isMovePossible(move))
+		return;
+
+	m_game.makeMove(move);
+	broadCastCurrentGameState(MESSAGETYPE::GAMESTATE_UPDATE);
+}
+
 void ChessServer::handleNewConnection(uint32_t newClientId)
 {
-	if (m_connectionIdToColor.empty())
-		m_connectionIdToColor.emplace(newClientId, chess::PieceColor::WHITE);
-	else
-		m_connectionIdToColor.emplace(newClientId, chess::PieceColor::BLACK);
+	chess::PieceColor newConnectionColor = chess::PieceColor::WHITE;
+	if (!m_connectionIdToColor.empty())
+		newConnectionColor = chess::PieceColor::BLACK;
 
-	InitMessageData data{chess::PieceColor::WHITE, m_gameMode };
-	auto newMessage = std::make_shared<net::Message>(newClientId, MESSAGETYPE::INIT_GAME, data);
-	m_server->sendMessage(newMessage);
+	m_connectionIdToColor.emplace(newClientId, newConnectionColor);
+
+	InitMessageData data{ newConnectionColor, m_gameMode };
+	auto initPlayerMessage = std::make_shared<net::Message>(newClientId, MESSAGETYPE::INIT_GAME, data);
+	m_server->sendMessage(initPlayerMessage);
+
+	if (m_connectionIdToColor.size() == 2) 
+		broadCastCurrentGameState(MESSAGETYPE::START_GAME);
+}
+
+void ChessServer::broadCastCurrentGameState(MESSAGETYPE messageType)
+{
+	auto startGameMessage = std::make_shared<net::Message>(net::BROADCAST, messageType, m_game.getFenString());
+	m_server->broadcastMessage(startGameMessage);
 }

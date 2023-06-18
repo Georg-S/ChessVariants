@@ -37,17 +37,17 @@ void net::TCPClient::stop()
 
 size_t net::TCPClient::getMessageCount() const
 {
-	return m_inMessages.getSize();
+	return m_inMessages.size();
 }
 
 std::shared_ptr<Message> net::TCPClient::getFirstMessage()
 {
-	return m_inMessages.getFront();
+	return m_inMessages.front();
 }
 
 std::shared_ptr<Message> net::TCPClient::getAndRemoveFirstMessage()
 {
-	return m_inMessages.getAndRemoveFirstMessage();
+	return m_inMessages.getAndRemoveFirstElement();
 }
 
 void net::TCPClient::popFrontMessage()
@@ -58,7 +58,7 @@ void net::TCPClient::popFrontMessage()
 void net::TCPClient::sendMessage(std::shared_ptr<Message> message)
 {
 	auto self(shared_from_this());
-	auto size = m_outMessages.addMessage(message);
+	auto size = m_outMessages.pushBack(message);
 	if (size == 1)
 		boost::asio::post(m_context, [self]() {self->sendMessage(); });
 }
@@ -77,7 +77,7 @@ void net::TCPClient::connectTo(const tcp::resolver::results_type& endpoints)
 
 			std::cout << "Connected to server" << std::endl;
 
-			self->m_session = std::make_shared<Session>(self->m_socket, &self->m_inMessages);
+			self->m_session = std::make_shared<Session>(self->m_socket);
 			self->readHeader();
 		});
 }
@@ -114,7 +114,7 @@ void net::TCPClient::readBody(std::shared_ptr<Message> unfinishedMessage)
 				self->m_session->disconnect();
 				return;
 			}
-			self->m_inMessages.addMessage(unfinishedMessage);
+			self->m_inMessages.pushBack(unfinishedMessage);
 			self->readHeader();
 		});
 }
@@ -122,7 +122,7 @@ void net::TCPClient::readBody(std::shared_ptr<Message> unfinishedMessage)
 void net::TCPClient::sendMessage()
 {
 	assert(!m_outMessages.empty());
-	auto message = m_outMessages.getFront();
+	auto message = m_outMessages.front();
 
 	boost::asio::async_write(*m_socket, boost::asio::buffer(message->getMessageStart(), message->messageSize()),
 		[this](boost::system::error_code ec, std::size_t bytesWritten)

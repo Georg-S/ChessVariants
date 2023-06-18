@@ -9,34 +9,17 @@
 #include <boost/asio/ts/internet.hpp>
 
 #include "Message.hpp"
+#include "ThreadSafeQueue.hpp"
 
 namespace net 
 {
 	using boost::asio::ip::tcp;
 
-	// A thread safe message queue
-	class MessageQueue 
-	{
-	public:
-		MessageQueue() = default;
-		size_t getSize() const;
-		size_t addMessage(std::shared_ptr<Message> message); // Returns the size after adding the message
-		std::shared_ptr<Message> getFront();
-		std::shared_ptr<Message> getAndRemoveFirstMessage(); // Return nullptr if empty
-		size_t popFront();
-		bool empty() const;
-
-	private:
-		mutable std::mutex m_mut;
-		std::deque<std::shared_ptr<Message>> m_messages;
-	};
-
-
 	class Session : public std::enable_shared_from_this<Session>
 	{
 	public:
-		Session(std::shared_ptr<tcp::socket> socket, MessageQueue* messageQueue);
-		Session(std::shared_ptr<tcp::socket> socket, uint32_t id, MessageQueue* messageQueue);
+		Session(std::shared_ptr<tcp::socket> socket);
+		Session(std::shared_ptr<tcp::socket> socket, uint32_t id);
 		~Session();
 		void disconnect();
 		bool isConnected() const;

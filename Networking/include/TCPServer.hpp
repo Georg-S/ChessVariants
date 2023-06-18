@@ -25,7 +25,7 @@ namespace net
 		void stop();
 		void setMaxAllowedConnections(uint32_t maxAllowedConnections);
 		size_t getCountOfConnectedClients() const;
-		std::shared_ptr<Message> getAndRemoveFirstMessage();
+		std::shared_ptr<ServerMessage> getAndRemoveFirstMessage();
 		void sendMessage(std::shared_ptr<Message> message);
 		void broadcastMessage(std::shared_ptr<Message> message, std::initializer_list<uint32_t> ignoreIDs = {});
 
@@ -35,7 +35,7 @@ namespace net
 		void sendMessage(std::shared_ptr<Message> message, std::shared_ptr<Session> session);
 		void acceptConnection();
 		void readHeader(std::shared_ptr<Session> session);
-		void readBody(std::shared_ptr<Session> session, std::shared_ptr<Message> unfinishedMessage);
+		void readBody(std::shared_ptr<Session> session, std::shared_ptr<ServerMessage> unfinishedMessage);
 		void cleanupConnection();
 
 		static constexpr uint32_t SessionStartId = 2;
@@ -46,7 +46,7 @@ namespace net
 		std::thread m_thread;
 		uint32_t m_sessionId = SessionStartId;
 		std::optional<uint32_t> m_maxAllowedConnections;
-		MessageQueue m_inMessages;
-		MessageQueue m_outMessages;
+		ThreadSafeQueue<ServerMessage> m_inMessages;
+		ThreadSafeQueue<Message> m_outMessages;
 	};
 }

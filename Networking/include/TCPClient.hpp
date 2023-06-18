@@ -9,11 +9,14 @@
 #include <boost/asio/ts/buffer.hpp>
 #include <boost/asio/ts/internet.hpp>
 
+#include "ThreadSafeQueue.hpp"
 #include "Utility.hpp"
 #include "Message.hpp"
 
 namespace net
 {
+	using ClientMessageQueue = ThreadSafeQueue<Message>;
+
 	class TCPClient : public std::enable_shared_from_this<TCPClient>
 	{
 	public:
@@ -40,7 +43,7 @@ namespace net
 		boost::asio::io_context m_context;
 		std::shared_ptr<Session> m_session;
 		std::shared_ptr<tcp::socket> m_socket;
-		MessageQueue m_inMessages;
-		MessageQueue m_outMessages;
+		ClientMessageQueue m_inMessages;
+		ClientMessageQueue m_outMessages;
 	};
 }

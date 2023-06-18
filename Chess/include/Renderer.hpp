@@ -23,6 +23,7 @@ namespace chess {
 	{
 	public:
 		Renderer();
+		void start();
 		void renderBoard(const std::string& fenBoardString);
 		void renderBoard(const chess::Board& board);
 		void render(const RenderInformation& renderInfo);
@@ -46,6 +47,7 @@ namespace chess {
 		std::string getPieceTypeString(char fenChar) const;
 		std::string getColorString(chess::PieceColor color) const;
 
+		bool m_running = false;
 		bool m_renderPreviousMove = true;
 		static constexpr int PIECE_WIDTH = WINDOW_WIDTH / chess::BOARD_WIDTH;
 		static constexpr int PIECE_HEIGHT = WINDOW_HEIGHT / chess::BOARD_HEIGHT;

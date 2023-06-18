@@ -8,13 +8,12 @@ using namespace chess;
 
 chess::Game::Game(const std::string& fenString)
 {
-	auto splitted = stringSplit(fenString, " ");
-	assert(splitted.size() >= 2);
-	m_board = Board(fenString);
+	setGameState(fenString);
+}
 
-	m_currentPlayer = PieceColor::WHITE;
-	if (splitted[1] == "b")
-		m_currentPlayer = PieceColor::BLACK;
+void chess::Game::enableRendering()
+{
+	m_renderer.start();
 }
 
 bool Game::update()
@@ -61,6 +60,27 @@ std::optional<Position> chess::Game::getSelectedPromotionPosition() const
 	return result;
 }
 
+std::optional<Position> chess::Game::getSelectedPiecePosition() const
+{
+	return m_selectedPiece;
+}
+
+PieceColor chess::Game::getCurrentPlayer() const
+{
+	return m_currentPlayer;
+}
+
+void chess::Game::setGameState(const std::string& fenString)
+{
+	auto splitted = stringSplit(fenString, " ");
+	assert(splitted.size() >= 2);
+	m_board = Board(fenString);
+
+	m_currentPlayer = PieceColor::WHITE;
+	if (splitted[1] == "b")
+		m_currentPlayer = PieceColor::BLACK;
+}
+
 void Game::selectPiece(const Position& pos)
 {
 	if (m_board.isOccupied(pos) && (m_board[pos]->getColor() == m_currentPlayer))
@@ -87,12 +107,30 @@ void chess::Game::makeMoveWithSelectedPiece(const Position& to)
 		return;
 
 	const Move move = { fromPosition, to };
-	if (!isMovePossible(m_board, move))
+	if (!::isMovePossible(m_board, move))
 		return;
 
 	::makeMove(&m_board, move);
 	m_renderInfo.previousMove = move;
 	m_currentPlayer = getNextPlayer(m_currentPlayer);
+}
+
+void chess::Game::makeMove(const Move& move)
+{
+	::makeMove(&m_board, move);
+	m_renderInfo.previousMove = move;
+	m_currentPlayer = getNextPlayer(m_currentPlayer);
+}
+
+bool chess::Game::isMovePossible(const Move& move) const 
+{
+	if (!m_board[move.from])
+		return false;
+
+	if (m_board[move.from]->getColor() != m_currentPlayer)
+		return false;
+
+	return ::isMovePossible(m_board, move);
 }
 
 void Game::deselectPiece()
@@ -114,6 +152,11 @@ bool chess::Game::isInPromotion() const
 		return true;
 
 	return false;
+}
+
+std::string chess::Game::getFenString() const
+{
+	return m_board.getFenString(m_currentPlayer);
 }
 
 char chess::Game::getPieceFromPromotion(const Position& pos) const

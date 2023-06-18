@@ -1,17 +1,5 @@
 #include "ChessClient.hpp"
 
-static void sendMessage(std::shared_ptr<net::TCPClient> client)
-{
-	while (true)
-	{
-		std::string myStr;
-		std::cin >> myStr;
-		auto outMessage = std::make_shared<net::Message>(static_cast<uint32_t>(0), static_cast<uint32_t>(0), (void*)myStr.c_str(), static_cast<uint32_t>(myStr.size() + 1));
-
-		client->sendMessage(outMessage);
-	}
-}
-
 ChessClient::ChessClient()
 {
 	// TODO read ip from file
@@ -26,14 +14,13 @@ void ChessClient::run()
 	m_client->connect();
 	m_client->run();
 
-	auto inputThread = std::thread([this]() {sendMessage(m_client); });
-
 	while (true) // TODO run until disconnected
 	{
 		auto message = m_client->getAndRemoveFirstMessage();
 		if (message)
 			handleMessage(message);
 
+		handleGame();
 	}
 }
 
@@ -43,15 +30,66 @@ void ChessClient::handleMessage(std::shared_ptr<net::Message> message)
 	{
 	case MESSAGETYPE::INIT_GAME:
 	{
-		const InitMessageData* data = static_cast<InitMessageData*>(message->getBodyStart());
-
+		const InitMessageData* data = static_cast<const InitMessageData*>(message->getBodyStart());
+		m_playerColor = data->playerColor;
+		m_gameMode = data->gameMode;
 		std::cout << "Init game Message received" << std::endl;
 
-		// TODO
-		break;
+		return;
+	}
+	case MESSAGETYPE::START_GAME: 
+	{
+		assert(m_playerColor != chess::PieceColor::NONE);
+		m_game.setGameState(message->bodyToString());
+		m_game.enableRendering();
+		m_runGame = true;
+
+		std::cout << "Start game Message received" << std::endl;
+		return;
+	}
+	case MESSAGETYPE::GAMESTATE_UPDATE:
+	{
+		m_game.setGameState(message->bodyToString());
+		return;
 	}
 	default:
-		std::cout << "Unrecognized Message received" << std::endl;
-		break;
+		std::cout << "Unrecognized message received" << std::endl;
+		assert(!"Unrecognized message received");
+		return;
+	}
+}
+
+void ChessClient::handleGame()
+{
+	if (!m_runGame)
+		return;
+
+	m_game.update();
+	if (m_playerColor != m_game.getCurrentPlayer())
+		return;
+
+	auto selectedPos = m_game.getSelectedBoardPosition();
+	if (!selectedPos)
+		return;
+
+	if (!m_game.isPieceSelected()) 
+	{
+		m_game.selectPiece(*selectedPos);
+		return;
+	}
+
+	auto from = m_game.getSelectedPiecePosition();
+	assert(from);
+	chess::Move move = { *from, *selectedPos };
+	m_game.deselectPiece();
+
+	if (!m_game.isMovePossible(move)) 
+	{
+		return;
+	}
+	else 
+	{
+		auto makeMoveMessage = std::make_shared<net::Message>(net::SERVER, MESSAGETYPE::MAKE_MOVE, move);
+		m_client->sendMessage(makeMoveMessage);
 	}
 }

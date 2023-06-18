@@ -45,14 +45,14 @@ size_t net::TCPServer::getCountOfConnectedClients() const
 	return m_sessions.size();
 }
 
-std::shared_ptr<net::Message> net::TCPServer::getAndRemoveFirstMessage()
+std::shared_ptr<net::ServerMessage> net::TCPServer::getAndRemoveFirstMessage()
 {
-	return m_inMessages.getAndRemoveFirstMessage();
+	return m_inMessages.getAndRemoveFirstElement();
 }
 
 void net::TCPServer::sendMessage(std::shared_ptr<Message> message)
 {
-	auto size = m_outMessages.addMessage(message);
+	auto size = m_outMessages.pushBack(message);
 	if (size == 1)
 		boost::asio::post(m_context, [this]() {sendMessage(); });
 }
@@ -86,7 +86,7 @@ void net::TCPServer::broadcastMessage(std::shared_ptr<Message> message, std::ini
 void net::TCPServer::sendMessage()
 {
 	assert(!m_outMessages.empty());
-	auto message = m_outMessages.getFront();
+	auto message = m_outMessages.front();
 
 	if (message->header.toID == SERVER)
 		std::cout << "Message sent from server to server ... do nothing" << std::endl;
@@ -152,15 +152,16 @@ void net::TCPServer::acceptConnection()
 
 			std::scoped_lock lock(m_sessionMutex);
 			std::cout << m_sessionId << " connected to server" << std::endl;
-			auto newSession = std::make_shared<Session>(socketPtr, m_sessionId, &this->m_inMessages);
+			auto newSession = std::make_shared<Session>(socketPtr, m_sessionId);
 			m_sessions[m_sessionId] = newSession;
 			readHeader(newSession);
 
 			// Create and emplace a message so the user of the server knows, when a client has connected
-			auto message = std::make_shared<Message>();
+			auto message = std::make_shared<ServerMessage>();
 			message->header.messageType = NEW_CONNECTION;
+			message->fromID = m_sessionId;
 			message->header.toID = m_sessionId;
-			m_inMessages.addMessage(message);
+			m_inMessages.pushBack(message);
 
 			++m_sessionId;
 
@@ -170,7 +171,7 @@ void net::TCPServer::acceptConnection()
 
 void net::TCPServer::readHeader(std::shared_ptr<Session> session)
 {
-	auto currentMessage = std::make_shared<Message>();
+	auto currentMessage = std::make_shared<ServerMessage>();
 	boost::asio::async_read(*session->m_socket, boost::asio::buffer(&currentMessage->header, Message::headerSize()),
 		[this, session, currentMessage](boost::system::error_code ec, size_t bytesRead)
 		{
@@ -182,13 +183,14 @@ void net::TCPServer::readHeader(std::shared_ptr<Session> session)
 				return;
 			}
 			currentMessage->resize();
+			currentMessage->fromID = session->m_id; // TODO maybe only access through getter
 
 			readBody(session, currentMessage);
 		}
 	);
 }
 
-void net::TCPServer::readBody(std::shared_ptr<Session> session, std::shared_ptr<Message> unfinishedMessage)
+void net::TCPServer::readBody(std::shared_ptr<Session> session, std::shared_ptr<ServerMessage> unfinishedMessage)
 {
 	boost::asio::async_read(*session->m_socket, boost::asio::buffer(unfinishedMessage->getBodyStart(), unfinishedMessage->bodySize()),
 		[this, session, unfinishedMessage](boost::system::error_code ec, size_t bytesRead)
@@ -200,7 +202,7 @@ void net::TCPServer::readBody(std::shared_ptr<Session> session, std::shared_ptr<
 				cleanupConnection();
 				return;
 			}
-			m_inMessages.addMessage(unfinishedMessage);
+			m_inMessages.pushBack(unfinishedMessage);
 
 			readHeader(session);
 		});
@@ -218,10 +220,11 @@ void net::TCPServer::cleanupConnection()
 					it = m_sessions.erase(it);
 
 					// Create and emplace a message so the user of the server knows, when a client has disconnected
-					auto message = std::make_shared<Message>();
+					auto message = std::make_shared<ServerMessage>();
 					message->header.messageType = CONNECTION_CLOSED;
 					message->header.toID = m_sessionId;
-					m_inMessages.addMessage(message);
+					message->fromID = m_sessionId;
+					m_inMessages.pushBack(message);
 				}
 				else 
 				{

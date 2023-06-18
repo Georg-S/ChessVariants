@@ -8,12 +8,15 @@ set(HEADERS
 	"include/TCPServer.hpp"
 	"include/TCPClient.hpp"
 	"include/Message.hpp"
-	"include/Utility.hpp")
+	"include/Utility.hpp"
+	"include/ThreadSafeQueue.hpp"
+	)
 
 set(SOURCES 
 	"src/TCPServer.cpp"
 	"src/TCPClient.cpp"
-	"src/Utility.cpp")
+	"src/Utility.cpp"
+	)
 
 if (MSVC)
 	set(BOOST_ROOT $ENV{BOOST_ROOT})

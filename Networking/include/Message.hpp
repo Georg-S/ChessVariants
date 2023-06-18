@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <vector>
 #include <type_traits>
+#include <cstddef>
 
 namespace net
 {
@@ -28,20 +29,31 @@ namespace net
 			uint32_t bodySize;
 		};
 		Header header = {};
-		std::vector<uint8_t> dataBuffer;
+		std::vector<std::byte> dataBuffer;
 
 		Message() = default; // Resize should be called once the header is set
 
 		template <typename Messagetype, typename struc>
-		Message(uint32_t toID, Messagetype messageType, const struc& elem)
+		Message(uint32_t toID, Messagetype messageType, const struc& data)
 		{
 			static_assert(std::is_trivially_copyable<struc>::value, "Muste be trivially copyable");
 			static_assert(std::is_integral_v<Messagetype> || std::is_enum_v<Messagetype>, "Message type must be an integral or an enum");
 			header.toID = toID;
 			header.messageType = static_cast<uint32_t>(messageType);
-			header.bodySize = sizeof(elem);
+			header.bodySize = sizeof(data);
 			allocateAndInitializeBuffer();
-			copyDataIntoBuffer(&elem, header.bodySize);
+			copyDataIntoBuffer(&data, header.bodySize);
+		}
+
+		template <typename Messagetype>
+		Message(uint32_t toID, Messagetype messageType, const std::string& dataStr) 
+		{
+			static_assert(std::is_integral_v<Messagetype> || std::is_enum_v<Messagetype>, "Message type must be an integral or an enum");
+			header.toID = toID;
+			header.messageType = static_cast<uint32_t>(messageType);
+			header.bodySize = static_cast<uint32_t>(dataStr.size() + 1);
+			allocateAndInitializeBuffer();
+			copyDataIntoBuffer(dataStr.c_str(), static_cast<uint32_t>(dataStr.size()));
 		}
 
 		Message(Header header)
@@ -77,6 +89,11 @@ namespace net
 			return dataBuffer.data();
 		}
 
+		const void* getBodyStart() const
+		{
+			return dataBuffer.data() + headerSize();
+		}
+
 		void* getBodyStart() 
 		{
 			return dataBuffer.data() + headerSize();
@@ -97,6 +114,12 @@ namespace net
 			return headerSize() + bodySize();
 		}
 
+		/// Only works if the message body ONLY consists of one string
+		std::string bodyToString() const 
+		{
+			return std::string(static_cast<const char*>(getBodyStart()), bodySize());
+		}
+
 	private:
 		void copyHeaderIntoDataBuffer() 
 		{
@@ -105,7 +128,7 @@ namespace net
 
 		void allocateAndInitializeBuffer()
 		{
-			dataBuffer = std::vector<uint8_t>(header.bodySize + headerSize(), 0);
+			dataBuffer = std::vector<std::byte>(header.bodySize + headerSize(), std::byte(0));
 			copyHeaderIntoDataBuffer();
 		}
 
@@ -113,5 +136,11 @@ namespace net
 		{
 			memcpy_s(getBodyStart(), header.bodySize, data, dataSize);
 		}
+	};
+
+	class ServerMessage : public Message
+	{
+	public:
+		uint32_t fromID;
 	};
 }

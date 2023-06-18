@@ -8,17 +8,28 @@ static const std::string basePath = "Images/";
 chess::Renderer::Renderer()
 {
 	m_sdlHandler = std::make_unique<SDLHandler>(WINDOW_WIDTH, WINDOW_HEIGHT, true);
-	m_sdlHandler->start("Chess");
+}
+
+void chess::Renderer::start()
+{
+	if (!m_running) 
+		m_running = m_sdlHandler->start("Chess");
 }
 
 void chess::Renderer::renderBoard(const std::string& fenBoardString)
 {
+	if (!m_running)
+		return;
+
 	Board board = Board(fenBoardString);
 	renderBoard(board);
 }
 
 void chess::Renderer::renderBoard(const chess::Board& board)
 {
+	if (!m_running)
+		return;
+
 	m_sdlHandler->clear();
 	renderChessBoard();
 	renderPieces(board);
@@ -27,6 +38,9 @@ void chess::Renderer::renderBoard(const chess::Board& board)
 
 void chess::Renderer::render(const RenderInformation& renderInfo)
 {
+	if (!m_running)
+		return;
+
 	m_sdlHandler->clear();
 
 	if (renderInfo.promotionSelectionColor) 
@@ -45,6 +59,7 @@ bool chess::Renderer::isQuit() const
 void chess::Renderer::close()
 {
 	m_sdlHandler->close();
+	m_running = false;
 }
 
 void chess::Renderer::renderNormalGameState(const RenderInformation& renderInfo)
