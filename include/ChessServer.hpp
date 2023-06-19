@@ -4,7 +4,7 @@
 
 #include <TCPServer.hpp>
 #include <Message.hpp>
-#include <Game.hpp>
+#include <GameModes/Game.hpp>
 
 #include "Messages.hpp"
 
@@ -21,7 +21,7 @@ private:
 	void broadCastCurrentGameState(MESSAGETYPE messageType);
 	std::shared_ptr<net::TCPServer> m_server;
 	static constexpr int MAX_ALLOWED_CONNECTIONS = 2;
-	chess::Game m_game;
+	std::unique_ptr<chess::Game> m_game;
 	chess::GAME_MODES m_gameMode = chess::GAME_MODES::NORMAL;
 	std::map<uint32_t, chess::PieceColor> m_connectionIdToColor;
 };

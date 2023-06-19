@@ -1,38 +1,10 @@
-#include "Game.hpp"
+#include "GameModes/Game.hpp"
 
 #include <cassert>
 #include "Utility.hpp"
 #include "GameLogic.hpp"
 
 using namespace chess;
-
-chess::Game::Game(const std::string& fenString)
-{
-	setGameState(fenString);
-}
-
-void chess::Game::enableRendering()
-{
-	m_renderer.start();
-}
-
-bool Game::update()
-{
-	m_mouse.update();
-	updateRenderInfo();
-
-	if (m_mouse.isRightPressed())
-		deselectPiece();
-
-	m_renderer.render(m_renderInfo);
-	if (m_renderer.isQuit()) 
-	{
-		m_renderer.close();
-		return false;
-	}
-
-	return true;
-}
 
 std::optional<Position> Game::getSelectedBoardPosition() const
 {
@@ -85,52 +57,14 @@ void Game::selectPiece(const Position& pos)
 {
 	if (m_board.isOccupied(pos) && (m_board[pos]->getColor() == m_currentPlayer))
 		m_selectedPiece = pos;
-	else 
+	else
 		m_selectedPiece = std::nullopt;
 }
 
-void Game::selectPieceForPromotion(const Position& selectedPos) 
+void Game::selectPieceForPromotion(const Position& selectedPos)
 {
 	auto piece = getPieceFromPromotion(selectedPos);
 	executePromotion(&m_board, piece);
-}
-
-void chess::Game::makeMoveWithSelectedPiece(const Position& to)
-{
-	if (!m_selectedPiece)
-		return;
-
-	const Position fromPosition = *m_selectedPiece;
-	deselectPiece();
-
-	if (m_board[fromPosition]->getColor() != m_currentPlayer)
-		return;
-
-	const Move move = { fromPosition, to };
-	if (!::isMovePossible(m_board, move))
-		return;
-
-	::makeMove(&m_board, move);
-	m_renderInfo.previousMove = move;
-	m_currentPlayer = getNextPlayer(m_currentPlayer);
-}
-
-void chess::Game::makeMove(const Move& move)
-{
-	::makeMove(&m_board, move);
-	m_renderInfo.previousMove = move;
-	m_currentPlayer = getNextPlayer(m_currentPlayer);
-}
-
-bool chess::Game::isMovePossible(const Move& move) const 
-{
-	if (!m_board[move.from])
-		return false;
-
-	if (m_board[move.from]->getColor() != m_currentPlayer)
-		return false;
-
-	return ::isMovePossible(m_board, move);
 }
 
 void Game::deselectPiece()
@@ -178,12 +112,4 @@ char chess::Game::getPieceFromPromotion(const Position& pos) const
 		piece = toupper(piece);
 
 	return piece;
-}
-
-void chess::Game::updateRenderInfo()
-{
-	m_renderInfo.board = m_board.getDeepCopy();
-	m_renderInfo.positionToRenderOnMousePosition = m_selectedPiece;
-	m_renderInfo.mousePos = { m_mouse.getMousePositionX(), m_mouse.getMousePositionY() };
-	m_renderInfo.promotionSelectionColor = getPromotionSelectionColor(m_board);
 }

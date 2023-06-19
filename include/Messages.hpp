@@ -2,7 +2,7 @@
 #include <cstdint>
 
 #include <Message.hpp>
-#include <Game.hpp>
+#include <GameModes/Game.hpp>
 
 enum class MESSAGETYPE : uint32_t
 {

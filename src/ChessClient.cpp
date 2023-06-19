@@ -1,5 +1,7 @@
 #include "ChessClient.hpp"
 
+#include <GameModes/Chess.hpp>
+
 ChessClient::ChessClient()
 {
 	// TODO read ip from file
@@ -40,8 +42,8 @@ void ChessClient::handleMessage(std::shared_ptr<net::Message> message)
 	case MESSAGETYPE::START_GAME: 
 	{
 		assert(m_playerColor != chess::PieceColor::NONE);
-		m_game.setGameState(message->bodyToString());
-		m_game.enableRendering();
+		m_game = std::make_unique<chess::Chess>();
+		m_game->enableRendering();
 		m_runGame = true;
 
 		std::cout << "Start game Message received" << std::endl;
@@ -49,7 +51,7 @@ void ChessClient::handleMessage(std::shared_ptr<net::Message> message)
 	}
 	case MESSAGETYPE::GAMESTATE_UPDATE:
 	{
-		m_game.setGameState(message->bodyToString());
+		m_game->setGameState(message->bodyToString());
 		return;
 	}
 	default:
@@ -64,26 +66,26 @@ void ChessClient::handleGame()
 	if (!m_runGame)
 		return;
 
-	m_game.update();
-	if (m_playerColor != m_game.getCurrentPlayer())
+	m_game->update();
+	if (m_playerColor != m_game->getCurrentPlayer())
 		return;
 
-	auto selectedPos = m_game.getSelectedBoardPosition();
+	auto selectedPos = m_game->getSelectedBoardPosition();
 	if (!selectedPos)
 		return;
 
-	if (!m_game.isPieceSelected()) 
+	if (!m_game->isPieceSelected()) 
 	{
-		m_game.selectPiece(*selectedPos);
+		m_game->selectPiece(*selectedPos);
 		return;
 	}
 
-	auto from = m_game.getSelectedPiecePosition();
+	auto from = m_game->getSelectedPiecePosition();
 	assert(from);
 	chess::Move move = { *from, *selectedPos };
-	m_game.deselectPiece();
+	m_game->deselectPiece();
 
-	if (!m_game.isMovePossible(move)) 
+	if (!m_game->isMovePossible(move)) 
 	{
 		return;
 	}

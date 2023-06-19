@@ -1,5 +1,7 @@
 #include "ChessServer.hpp"
 
+#include "GameModes/Chess.hpp"
+
 ChessServer::ChessServer()
 {
 	std::string ip = "0.0.0.0";
@@ -8,7 +10,7 @@ ChessServer::ChessServer()
 	// TODO read in the game mode from a file
 	m_gameMode = chess::GAME_MODES::NORMAL;
 
-	m_game = chess::Game(); // Todo handle different game modes etc.
+	m_game = std::make_unique<chess::Chess>(); // Todo handle different game modes etc.
 	m_server = std::make_unique<net::TCPServer>(ip, port);
 	m_server->setMaxAllowedConnections(MAX_ALLOWED_CONNECTIONS);
 }
@@ -76,13 +78,13 @@ void ChessServer::handleMove(uint32_t clientId, const chess::Move& move)
 {
 	assert(m_connectionIdToColor.find(clientId) != m_connectionIdToColor.end());
 	auto color = m_connectionIdToColor[clientId];
-	if (color != m_game.getCurrentPlayer())
+	if (color != m_game->getCurrentPlayer())
 		return;
 
-	if (!m_game.isMovePossible(move))
+	if (!m_game->isMovePossible(move))
 		return;
 
-	m_game.makeMove(move);
+	m_game->makeMove(move);
 	broadCastCurrentGameState(MESSAGETYPE::GAMESTATE_UPDATE);
 }
 
@@ -104,6 +106,6 @@ void ChessServer::handleNewConnection(uint32_t newClientId)
 
 void ChessServer::broadCastCurrentGameState(MESSAGETYPE messageType)
 {
-	auto startGameMessage = std::make_shared<net::Message>(net::BROADCAST, messageType, m_game.getFenString());
+	auto startGameMessage = std::make_shared<net::Message>(net::BROADCAST, messageType, m_game->getFenString());
 	m_server->broadcastMessage(startGameMessage);
 }

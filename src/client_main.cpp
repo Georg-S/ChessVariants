@@ -8,7 +8,6 @@
 #include <SDL/SDLHandler.hpp>
 #include <Board.hpp>
 #include <Renderer.hpp>
-#include <Game.hpp>
 #include <GameLogic.hpp>
 #include "ChessClient.hpp"
 

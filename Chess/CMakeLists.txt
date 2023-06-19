@@ -16,13 +16,17 @@ set(PIECES_HEADER
 	"include/Pieces/Queen.hpp"
 	"include/Pieces/Rook.hpp"
 	)
+	
+set(GAMEMODES_HEADER
+	"include/GameModes/Game.hpp"
+	"include/GameModes/Chess.hpp"
+	)
 
 set(CHESS_HEADER
 	"include/GameLogic.hpp"
 	"include/Board.hpp"
 	"include/Renderer.hpp"
 	"include/Utility.hpp"
-	"include/Game.hpp"
 	"include/Vec2D.hpp"
 	)
 	
@@ -40,19 +44,25 @@ set(PIECES_SOURCE
 	"src/Pieces/Queen.cpp"
 	"src/Pieces/Rook.cpp"
 	)
+	
+set(GAMEMODES_SOURCE
+	"src/GameModes/Game.cpp"
+	"src/GameModes/Chess.cpp"
+	)
 
 set(CHESS_SOURCE
 	"src/GameLogic.cpp"
 	"src/Board.cpp"
 	"src/Utility.cpp"
 	"src/Renderer.cpp"
-	"src/Game.cpp"
 	)
 	
 set(HEADER
 	${PIECES_HEADER}
 	${SDL_HEADER}
 	${CHESS_HEADER}
+	${GAMEMODES_HEADER}
+	${GAMEMODES_SOURCE}
 	)
 	
 set(SOURCE
@@ -64,6 +74,7 @@ set(SOURCE
 source_group("\\Chess\\Pieces" FILES ${PIECES_HEADER} ${PIECES_SOURCE})
 source_group("\\SDL2" FILES ${SDL_HEADER} ${SDL_SOURCE})
 source_group("\\Chess" FILES ${CHESS_HEADER} ${CHESS_SOURCE})
+source_group("\\Chess\\GameModes" FILES ${GAMEMODES_HEADER} ${GAMEMODES_SOURCE})
 
 add_library(Chess STATIC 
 	${HEADER}
