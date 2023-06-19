@@ -162,7 +162,44 @@ bool chess::isMovePossible(const Board& board, const Move& move)
     return !isCheck(copyBoard, playerColor);
 }
 
-std::vector<Move> chess::getAllMovesPossible(const Board& board, const Position& piecePosition)
+bool chess::isGameOver(const Board& board, PieceColor color) 
+{
+    return getAllPossibleMoves(board, color).empty();
+}
+
+bool chess::isCheckMate(const Board& board, PieceColor color) 
+{
+    return isGameOver(board, color) && isCheck(board, color);
+}
+
+bool chess::isStaleMate(const Board& board, PieceColor color) 
+{
+    return isGameOver(board, color) && !isCheck(board, color);
+}
+
+std::vector<Move> chess::getAllPossibleMoves(const Board& board, PieceColor color) 
+{
+    std::vector<Move> allPossibleMoves;
+
+    Position pos = { 0, 0 };
+    for (pos.x = 0; pos.x < BOARD_WIDTH; pos.x++)
+    {
+        for (pos.y = 0; pos.y < BOARD_HEIGHT; pos.y++)
+        {
+            auto piece = board[pos];
+            if (!piece || (piece->getColor() != color))
+                continue;
+
+            auto possibleMoves = getAllPossibleMoves(board, pos);
+            allPossibleMoves.insert(allPossibleMoves.end(), std::make_move_iterator(possibleMoves.begin()),
+                std::make_move_iterator(possibleMoves.end()));
+        }
+    }
+
+    return allPossibleMoves;
+}
+
+std::vector<Move> chess::getAllPossibleMoves(const Board& board, const Position& piecePosition)
 {
     auto piece = board[piecePosition];
     if (!piece)

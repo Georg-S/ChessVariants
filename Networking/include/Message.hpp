@@ -14,8 +14,8 @@ namespace net
 
 	enum SystemMessages : uint32_t
 	{
-		NEW_CONNECTION, // Has no body data and writes the id of the new connected client to the "toID"
-		CONNECTION_CLOSED, // Has no body data and writes the id of the lost connection client id to the "toID"
+		NEW_CONNECTION, // Has no body data and writes the id of the new connected client to the "fromID" and "toID"
+		CONNECTION_CLOSED, // Has no body data and writes the id of the lost connection client id to the "fromID" and "toID"
 		SYSTEM_MESSAGES_END
 	};
 

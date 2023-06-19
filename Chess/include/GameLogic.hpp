@@ -10,7 +10,11 @@ namespace chess
 	bool isCheck(const Board& board, const Position& kingPos);
 	bool directMovePossible(const Board& board, const Move& move);
 	bool isMovePossible(const Board& board, const Move& move);
-	std::vector<Move> getAllMovesPossible(const Board& board, const Position& piecePosition);
+	bool isGameOver(const Board& board, PieceColor color);
+	bool isCheckMate(const Board& board, PieceColor color);
+	bool isStaleMate(const Board& board, PieceColor color);
+	std::vector<Move> getAllPossibleMoves(const Board& board, PieceColor color);
+	std::vector<Move> getAllPossibleMoves(const Board& board, const Position& piecePosition);
 	std::optional<PieceColor> getPromotionSelectionColor(const Board& board);
 	void executePromotion(Board* inOutBoard, char selectedFenCharPiece);
 }

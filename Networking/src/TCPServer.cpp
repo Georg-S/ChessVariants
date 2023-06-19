@@ -159,8 +159,8 @@ void net::TCPServer::acceptConnection()
 			// Create and emplace a message so the user of the server knows, when a client has connected
 			auto message = std::make_shared<ServerMessage>();
 			message->header.messageType = NEW_CONNECTION;
-			message->fromID = m_sessionId;
 			message->header.toID = m_sessionId;
+			message->fromID = m_sessionId;
 			m_inMessages.pushBack(message);
 
 			++m_sessionId;

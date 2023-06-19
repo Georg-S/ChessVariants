@@ -34,7 +34,7 @@ void ChessServer::handleMessage(std::shared_ptr<net::ServerMessage> message)
 	{
 	case net::NEW_CONNECTION: 
 	{
-		handleNewConnection(message->header.toID);
+		handleNewConnection(message->fromID);
 		return;
 	}
 	case net::CONNECTION_CLOSED:

@@ -144,7 +144,7 @@ void chess::Renderer::render_piece_on_mouse_position(char piece, const Position&
 
 void chess::Renderer::renderAllPossibleMovesForSelectedPiece(const chess::Board& board, const chess::Position& selectedPos)
 {
-	auto possibleMoves = chess::getAllMovesPossible(board, selectedPos);
+	auto possibleMoves = chess::getAllPossibleMoves(board, selectedPos);
 	for (const auto& move : possibleMoves) 
 	{
 		m_sdlHandler->createAndPushBackRenderElement(basePath + "PossibleMove.png", PIECE_WIDTH * move.to.x, 
