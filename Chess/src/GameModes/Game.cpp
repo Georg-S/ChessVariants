@@ -53,18 +53,19 @@ void chess::Game::setGameState(const std::string& fenString)
 		m_currentPlayer = PieceColor::BLACK;
 }
 
+void chess::Game::pawnPromotion(const Position& selectedPromotionPiece)
+{
+	auto piece = getPieceFromPromotion(selectedPromotionPiece);
+	executePromotion(&m_board, piece);
+	m_currentPlayer = getNextPlayer(m_currentPlayer);
+}
+
 void Game::selectPiece(const Position& pos)
 {
 	if (m_board.isOccupied(pos) && (m_board[pos]->getColor() == m_currentPlayer))
 		m_selectedPiece = pos;
 	else
 		m_selectedPiece = std::nullopt;
-}
-
-void Game::selectPieceForPromotion(const Position& selectedPos)
-{
-	auto piece = getPieceFromPromotion(selectedPos);
-	executePromotion(&m_board, piece);
 }
 
 void Game::deselectPiece()

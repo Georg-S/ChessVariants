@@ -47,7 +47,9 @@ void chess::Chess::makeMove(const Move& move)
 {
 	::makeMove(&m_board, move);
 	m_renderInfo.previousMove = move;
-	m_currentPlayer = getNextPlayer(m_currentPlayer);
+	
+	if (!isInPromotion())
+		m_currentPlayer = getNextPlayer(m_currentPlayer);
 }
 
 void chess::Chess::updateRenderInfo()

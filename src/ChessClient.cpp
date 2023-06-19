@@ -42,7 +42,8 @@ void ChessClient::handleMessage(std::shared_ptr<net::Message> message)
 	case MESSAGETYPE::START_GAME: 
 	{
 		assert(m_playerColor != chess::PieceColor::NONE);
-		m_game = std::make_unique<chess::Chess>();
+		auto gameState = message->bodyToString();
+		m_game = std::make_unique<chess::Chess>(gameState); // TODO handle different game modes
 		m_game->enableRendering();
 		m_runGame = true;
 
@@ -69,6 +70,17 @@ void ChessClient::handleGame()
 	m_game->update();
 	if (m_playerColor != m_game->getCurrentPlayer())
 		return;
+
+	if (m_game->isInPromotion()) 
+	{
+		auto promotionPosition = m_game->getSelectedPromotionPosition();
+		if (promotionPosition) 
+		{
+			auto promotionMessage = std::make_shared<net::Message>(net::SERVER, MESSAGETYPE::PROMOTION_POSITION, *promotionPosition);
+			m_client->sendMessage(promotionMessage);
+		}
+		return;
+	}
 
 	auto selectedPos = m_game->getSelectedBoardPosition();
 	if (!selectedPos)

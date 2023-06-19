@@ -10,7 +10,7 @@ ChessServer::ChessServer()
 	// TODO read in the game mode from a file
 	m_gameMode = chess::GAME_MODES::NORMAL;
 
-	m_game = std::make_unique<chess::Chess>(); // Todo handle different game modes etc.
+	m_game = std::make_unique<chess::Chess>("4k3/3p2r1/8/8/8/8/8/RP2K2R w KQ - 0 1"); // Todo handle different game modes etc.
 	m_server = std::make_unique<net::TCPServer>(ip, port);
 	m_server->setMaxAllowedConnections(MAX_ALLOWED_CONNECTIONS);
 }
@@ -24,7 +24,6 @@ void ChessServer::run()
 		auto inMessage = m_server->getAndRemoveFirstMessage();
 		if (inMessage)
 			handleMessage(inMessage);
-
 	}
 }
 
@@ -61,17 +60,26 @@ void ChessServer::handleMessage(std::shared_ptr<net::ServerMessage> message)
 		handleMove(message->fromID, move);
 		break;
 	}
+	case MESSAGETYPE::PROMOTION_POSITION:
+	{
+		chess::Position position = *static_cast<const chess::Position*>(message->getBodyStart());
+		handlePromotion(message->fromID, position);
+		break;
+	}
 	default:
 		assert(!"Unhandled message");
 		break;
 	}
+}
 
+void ChessServer::handlePromotion(uint32_t clientId, const chess::Position& position)
+{
+	auto color = m_connectionIdToColor[clientId];
+	if (color != m_game->getCurrentPlayer())
+		return;
 
-	//{
-	//	m_server->broadcastMessage(inMessage);
-	//	auto str = std::string(static_cast<const char*>(inMessage->getBodyStart()), inMessage->bodySize());
-	//	std::cout << str << std::endl;
-	//}
+	m_game->pawnPromotion(position);
+	broadCastCurrentGameState(MESSAGETYPE::GAMESTATE_UPDATE);
 }
 
 void ChessServer::handleMove(uint32_t clientId, const chess::Move& move)
@@ -86,6 +94,7 @@ void ChessServer::handleMove(uint32_t clientId, const chess::Move& move)
 
 	m_game->makeMove(move);
 	broadCastCurrentGameState(MESSAGETYPE::GAMESTATE_UPDATE);
+	// TODO broadcast the move made, so the client can highlight the previous move
 }
 
 void ChessServer::handleNewConnection(uint32_t newClientId)

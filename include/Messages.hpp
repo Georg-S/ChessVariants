@@ -11,6 +11,7 @@ enum class MESSAGETYPE : uint32_t
 	START_GAME,
 	MAKE_MOVE,
 	GAMESTATE_UPDATE,
+	PROMOTION_POSITION,
 };
 
 struct InitMessageData

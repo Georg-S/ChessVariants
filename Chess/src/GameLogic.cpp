@@ -232,8 +232,14 @@ static std::optional<Position> getPromotionPawnPosition(const Board& board)
             if (!piece)
                 continue;
 
+            // Those two position checks are useless for normal chess, however it is required for swap chess
+            if (piece->getColor() == PieceColor::WHITE && (pos.y == 7))
+                continue;
+            if (piece->getColor() == PieceColor::BLACK && (pos.y == 0))
+                continue;
+            
             char pieceType = tolower(piece->getFenCharacter());
-            if (pieceType == 'p')
+            if (pieceType == 'p') 
                 return pos;
         }
     }
