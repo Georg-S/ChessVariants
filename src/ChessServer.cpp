@@ -94,7 +94,7 @@ void ChessServer::handleMove(uint32_t clientId, const chess::Move& move)
 
 	m_game->makeMove(move);
 	broadCastCurrentGameState(MESSAGETYPE::GAMESTATE_UPDATE);
-	// TODO broadcast the move made, so the client can highlight the previous move
+	broadCastLastMove(move);
 }
 
 void ChessServer::handleNewConnection(uint32_t newClientId)
@@ -116,5 +116,11 @@ void ChessServer::handleNewConnection(uint32_t newClientId)
 void ChessServer::broadCastCurrentGameState(MESSAGETYPE messageType)
 {
 	auto startGameMessage = std::make_shared<net::Message>(net::BROADCAST, messageType, m_game->getFenString());
+	m_server->broadcastMessage(startGameMessage);
+}
+
+void ChessServer::broadCastLastMove(const chess::Move& move)
+{
+	auto startGameMessage = std::make_shared<net::Message>(net::BROADCAST, MESSAGETYPE::PREVIOUS_MOVE, move);
 	m_server->broadcastMessage(startGameMessage);
 }

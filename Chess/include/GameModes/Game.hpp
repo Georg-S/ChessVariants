@@ -21,6 +21,7 @@ namespace chess
 		virtual bool isMovePossible(const Move& move) const = 0;
 		virtual void makeMove(const Move& move) = 0;
 		virtual bool isGameOver() const = 0;
+		virtual void setPreviousMove(const Move& move) = 0;
 		virtual void setGameState(const std::string& fenString);
 		virtual void pawnPromotion(const Position& selectedPromotionPiece);
 

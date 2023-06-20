@@ -55,6 +55,12 @@ void ChessClient::handleMessage(std::shared_ptr<net::Message> message)
 		m_game->setGameState(message->bodyToString());
 		return;
 	}
+	case MESSAGETYPE::PREVIOUS_MOVE:
+	{
+		chess::Move move = *static_cast<chess::Move*>(message->getBodyStart());
+		m_game->setPreviousMove(move);
+		return;
+	}
 	default:
 		std::cout << "Unrecognized message received" << std::endl;
 		assert(!"Unrecognized message received");

@@ -57,6 +57,11 @@ bool chess::Chess::isGameOver() const
 	return ::isGameOver(m_board, m_currentPlayer);
 }
 
+void chess::Chess::setPreviousMove(const Move& move)
+{
+	m_renderInfo.previousMove = move;
+}
+
 void chess::Chess::updateRenderInfo()
 {
 	m_renderInfo.board = m_board.getDeepCopy();

@@ -13,6 +13,7 @@ namespace chess
 		virtual bool isMovePossible(const Move& move) const override;
 		virtual void makeMove(const Move& move) override;
 		virtual bool isGameOver() const override;
+		virtual void setPreviousMove(const Move& move) override;
 
 	private:
 		void updateRenderInfo();
