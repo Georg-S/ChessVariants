@@ -20,6 +20,7 @@ namespace chess
 		virtual bool update() = 0; // Should return true if the window is still open
 		virtual bool isMovePossible(const Move& move) const = 0;
 		virtual void makeMove(const Move& move) = 0;
+		virtual bool isGameOver() const = 0;
 		virtual void setGameState(const std::string& fenString);
 		virtual void pawnPromotion(const Position& selectedPromotionPiece);
 

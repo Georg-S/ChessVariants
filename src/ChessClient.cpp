@@ -71,6 +71,9 @@ void ChessClient::handleGame()
 	if (m_playerColor != m_game->getCurrentPlayer())
 		return;
 
+	if (m_game->isGameOver())
+		return;
+
 	if (m_game->isInPromotion()) 
 	{
 		auto promotionPosition = m_game->getSelectedPromotionPosition();

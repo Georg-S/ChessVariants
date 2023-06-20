@@ -17,6 +17,7 @@ namespace chess {
 		std::optional<Position> positionToRenderOnMousePosition;
 		std::optional<Move> previousMove;
 		std::optional<Position> mousePos;
+		std::optional<chess::PieceColor> playerWon;
 	};
 
 	class Renderer
@@ -40,8 +41,7 @@ namespace chess {
 		void render_piece_on_mouse_position(char piece, const Position& mousePos);
 		void renderAllPossibleMovesForSelectedPiece(const chess::Board& board, const chess::Position& selectedPos);
 		void render_promotion_selection(chess::PieceColor color);
-		//void render_checkmate();
-		//void render_stalemate();
+		void renderGameOver(chess::PieceColor playerWon);
 		std::string getPieceFileString(char pieceChar, PieceColor color) const;
 		std::string getPieceFileString(char fenChar) const;
 		std::string getPieceTypeString(char fenChar) const;

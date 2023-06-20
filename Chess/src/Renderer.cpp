@@ -78,6 +78,9 @@ void chess::Renderer::renderNormalGameState(const RenderInformation& renderInfo)
 	{
 		renderPieces(renderInfo.board);
 	}
+
+	if (renderInfo.playerWon)
+		renderGameOver(*renderInfo.playerWon);
 }
 
 void chess::Renderer::renderChessBoard()
@@ -165,6 +168,19 @@ void chess::Renderer::render_promotion_selection(chess::PieceColor color)
 	m_sdlHandler->createAndPushBackRenderElement(rookStr, WINDOW_WIDTH / 2, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 	m_sdlHandler->createAndPushBackRenderElement(knightStr, 0, WINDOW_HEIGHT / 2, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 	m_sdlHandler->createAndPushBackRenderElement(bishopStr, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+}
+
+void chess::Renderer::renderGameOver(chess::PieceColor playerWon)
+{
+	std::string toRender = basePath + "GameOver/";
+	if (playerWon == PieceColor::BLACK)
+		toRender += "BlackWins.png";
+	else if (playerWon == PieceColor::WHITE)
+		toRender += "WhiteWins.png";
+	else
+		toRender += "Draw.png";
+
+	m_sdlHandler->createAndPushBackRenderElement(toRender, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 }
 
 std::string chess::Renderer::getPieceFileString(char pieceChar, PieceColor color) const

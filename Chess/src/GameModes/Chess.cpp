@@ -52,10 +52,21 @@ void chess::Chess::makeMove(const Move& move)
 		m_currentPlayer = getNextPlayer(m_currentPlayer);
 }
 
+bool chess::Chess::isGameOver() const
+{
+	return ::isGameOver(m_board, m_currentPlayer);
+}
+
 void chess::Chess::updateRenderInfo()
 {
 	m_renderInfo.board = m_board.getDeepCopy();
 	m_renderInfo.positionToRenderOnMousePosition = m_selectedPiece;
 	m_renderInfo.mousePos = { m_mouse.getMousePositionX(), m_mouse.getMousePositionY() };
 	m_renderInfo.promotionSelectionColor = getPromotionSelectionColor(m_board);
+	if (isCheckMate(m_board, PieceColor::BLACK))
+		m_renderInfo.playerWon = PieceColor::WHITE;
+	else if (isCheckMate(m_board, PieceColor::WHITE))
+		m_renderInfo.playerWon = PieceColor::BLACK;
+	else if (isStaleMate(m_board, m_currentPlayer))
+		m_renderInfo.playerWon = PieceColor::NONE;
 }

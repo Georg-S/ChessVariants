@@ -12,6 +12,7 @@ namespace chess
 		virtual bool update() override; // Returns true if the window is still open
 		virtual bool isMovePossible(const Move& move) const override;
 		virtual void makeMove(const Move& move) override;
+		virtual bool isGameOver() const override;
 
 	private:
 		void updateRenderInfo();

@@ -10,7 +10,7 @@ ChessServer::ChessServer()
 	// TODO read in the game mode from a file
 	m_gameMode = chess::GAME_MODES::NORMAL;
 
-	m_game = std::make_unique<chess::Chess>("4k3/3p2r1/8/8/8/8/8/RP2K2R w KQ - 0 1"); // Todo handle different game modes etc.
+	m_game = std::make_unique<chess::Chess>("4k3/RR6/8/8/8/8/8/4K3 w - - 0 1"); // Todo handle different game modes etc.
 	m_server = std::make_unique<net::TCPServer>(ip, port);
 	m_server->setMaxAllowedConnections(MAX_ALLOWED_CONNECTIONS);
 }
