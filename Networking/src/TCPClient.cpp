@@ -18,7 +18,7 @@ void net::TCPClient::connect()
 
 net::TCPClient::~TCPClient()
 {
-	m_session->disconnect();
+	stop();
 }
 
 void net::TCPClient::run()
@@ -57,17 +57,15 @@ void net::TCPClient::popFrontMessage()
 
 void net::TCPClient::sendMessage(std::shared_ptr<Message> message)
 {
-	auto self(shared_from_this());
 	auto size = m_outMessages.pushBack(message);
 	if (size == 1)
-		boost::asio::post(m_context, [self]() {self->sendMessage(); });
+		boost::asio::post(m_context, [this]() {sendMessage(); });
 }
 
 void net::TCPClient::connectTo(const tcp::resolver::results_type& endpoints)
 {
-	auto self(shared_from_this());
 	boost::asio::async_connect(*m_socket, endpoints,
-		[self](boost::system::error_code ec, tcp::endpoint tcpEndpoint) mutable
+		[this](boost::system::error_code ec, tcp::endpoint tcpEndpoint) mutable
 		{
 			if (ec)
 			{
@@ -77,45 +75,43 @@ void net::TCPClient::connectTo(const tcp::resolver::results_type& endpoints)
 
 			std::cout << "Connected to server" << std::endl;
 
-			self->m_session = std::make_shared<Session>(self->m_socket);
-			self->readHeader();
+			m_session = std::make_shared<Session>(m_socket);
+			readHeader();
 		});
 }
 
 void net::TCPClient::readHeader()
 {
-	auto self = TCPClient::shared_from_this();
 	auto currentMessage = std::make_shared<Message>();
 	boost::asio::async_read(*m_session->m_socket, boost::asio::buffer(&currentMessage->header, Message::headerSize()),
-		[self, currentMessage](boost::system::error_code ec, size_t bytesRead)
+		[this, currentMessage](boost::system::error_code ec, size_t bytesRead)
 		{
 			if (ec)
 			{
 				std::cout << "Error reading message header ... closing session: " << std::endl << ec.what() << std::endl;
-				self->m_session->disconnect();
+				m_session->disconnect();
 				return;
 			}
 			currentMessage->resize();
 
-			self->readBody(currentMessage);
+			readBody(currentMessage);
 		}
 	);
 }
 
 void net::TCPClient::readBody(std::shared_ptr<Message> unfinishedMessage)
 {
-	auto self = TCPClient::shared_from_this();
 	boost::asio::async_read(*m_session->m_socket, boost::asio::buffer(unfinishedMessage->getBodyStart(), unfinishedMessage->bodySize()),
-		[self, unfinishedMessage](boost::system::error_code ec, size_t bytesRead)
+		[this, unfinishedMessage](boost::system::error_code ec, size_t bytesRead)
 		{
 			if (ec)
 			{
 				std::cout << "Error reading message body ... closing session: " << std::endl << ec.what() << std::endl;
-				self->m_session->disconnect();
+				m_session->disconnect();
 				return;
 			}
-			self->m_inMessages.pushBack(unfinishedMessage);
-			self->readHeader();
+			m_inMessages.pushBack(unfinishedMessage);
+			readHeader();
 		});
 }
 

@@ -17,7 +17,7 @@ namespace net
 {
 	using ClientMessageQueue = ThreadSafeQueue<Message>;
 
-	class TCPClient : public std::enable_shared_from_this<TCPClient>
+	class TCPClient
 	{
 	public:
 		TCPClient(std::string ipAddress, uint16_t port);
