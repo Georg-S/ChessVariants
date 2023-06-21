@@ -18,46 +18,17 @@ using namespace boost;
 
 int main(int argc, char* argv[])
 {
-	//const std::string startPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-	//const std::string testPositionCanBeDeleted = "4k3/3pr3/8/4P3/8/8/8/R3K2R w KQ - 0 1";
+	std::unique_ptr<ChessClient> client;
+	try 
+	{
+		client = std::make_unique<ChessClient>();
+	}
+	catch (const std::exception& e) 
+	{
+		std::cout << "Client could not be created: " << e.what() << std::endl;
+	}
 
-	//chess::Game game = chess::Game(testPositionCanBeDeleted);
-
-	//std::cout << std::is_trivial<chess::Board>::value << std::endl;
-	//std::cout << std::is_trivially_copyable<chess::Board>::value << std::endl;
-
-	//while (game.update()) 
-	//{
-	//	Sleep(1);
-
-	//	if (game.isInPromotion()) 
-	//	{
-	//		auto selectedPiece = game.getSelectedPromotionPosition();
-	//		if (selectedPiece)
-	//			game.selectPieceForPromotion(*selectedPiece);
-
-	//		continue;
-	//	}
-
-	//	auto selectedPosition = game.getSelectedBoardPosition();
-	//	if (!selectedPosition)
-	//		continue;
-
-	//	if (game.isPieceSelected()) 
-	//		game.makeMoveWithSelectedPiece(*selectedPosition);
-	//	else 
-	//		game.selectPiece(*selectedPosition);
-
-	//	//Sleep(1);
-	//	//game.update();
-	//	//auto pos = game.getSelectedPosition();
-	//	//if (pos) 
-	//	//	std::cout << "X: " << pos->x << " Y: " << pos->y << std::endl;
-
-	//}
-	ChessClient client = ChessClient();
-	client.run();
-
+	client->run();
 
 	return 0;
 }

@@ -11,8 +11,17 @@ using namespace boost;
 
 int main(int argc, char* argv[])
 {
-	ChessServer server = ChessServer();
-	server.run();
+	std::unique_ptr<ChessServer> server;
+	try 
+	{
+		server = std::make_unique<ChessServer>();
+	}
+	catch (const std::exception& e) 
+	{
+		std::cout << "Error creating ChessServer: " << e.what() << std::endl;
+		return 0;
+	}
+	server->run();
 
 	return 0;
 }

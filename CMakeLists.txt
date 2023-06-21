@@ -55,6 +55,12 @@ if (MSVC)
 						COMMAND ${CMAKE_COMMAND} -E copy_directory
 						"${CMAKE_SOURCE_DIR}/Images"
 						"$<TARGET_FILE_DIR:ChessServer>/Images")
+
+	add_custom_command(TARGET ChessServer
+						POST_BUILD
+						COMMAND ${CMAKE_COMMAND} -E copy_if_different
+						"${CMAKE_SOURCE_DIR}/Configs/ChessServerConfig.ini"
+						"$<TARGET_FILE_DIR:ChessServer>/ChessServerConfig.ini")
 		
 	add_custom_command(TARGET ChessClient
 					POST_BUILD
@@ -74,4 +80,10 @@ if (MSVC)
 						COMMAND ${CMAKE_COMMAND} -E copy_directory
 						"${CMAKE_SOURCE_DIR}/Images"
 						"$<TARGET_FILE_DIR:ChessClient>/Images")
+
+	add_custom_command(TARGET ChessClient
+						POST_BUILD
+						COMMAND ${CMAKE_COMMAND} -E copy_if_different
+						"${CMAKE_SOURCE_DIR}/Configs/ChessClientConfig.ini"
+						"$<TARGET_FILE_DIR:ChessClient>/ChessClientConfig.ini")
 endif (MSVC)

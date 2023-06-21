@@ -1,14 +1,17 @@
 #include "ChessServer.hpp"
 
-#include "GameModes/Chess.hpp"
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ini_parser.hpp>
+#include <GameModes/Chess.hpp>
 
 ChessServer::ChessServer()
 {
-	std::string ip = "0.0.0.0";
-	// TODO port probably should be configurable in a file
-	uint16_t port = 2345;
-	// TODO read in the game mode from a file
-	m_gameMode = chess::GAME_MODES::NORMAL;
+	boost::property_tree::ptree pt;
+	boost::property_tree::ini_parser::read_ini("ChessServerConfig.ini", pt);
+	auto ip = pt.get<std::string>("General.IP");
+	auto port = pt.get<uint16_t>("General.Port");
+	auto gameModeBuf = pt.get<int>("General.GameMode");
+	m_gameMode = chess::GAME_MODES(gameModeBuf);
 
 	m_game = std::make_unique<chess::Chess>("4k3/RR6/8/8/8/8/8/4K3 w - - 0 1"); // Todo handle different game modes etc.
 	m_server = std::make_unique<net::TCPServer>(ip, port);
@@ -31,9 +34,9 @@ void ChessServer::handleMessage(std::shared_ptr<net::ServerMessage> message)
 {
 	const auto messageType = message->header.messageType;
 
-	switch (messageType) 
+	switch (messageType)
 	{
-	case net::NEW_CONNECTION: 
+	case net::NEW_CONNECTION:
 	{
 		handleNewConnection(message->fromID);
 		return;
@@ -49,12 +52,12 @@ void ChessServer::handleMessage(std::shared_ptr<net::ServerMessage> message)
 
 	switch (MESSAGETYPE(messageType))
 	{
-	case MESSAGETYPE::FEN_STRING: 
+	case MESSAGETYPE::FEN_STRING:
 	{
 		assert(!"Server shouldn't receive this message");
 		break;
 	}
-	case MESSAGETYPE::MAKE_MOVE: 
+	case MESSAGETYPE::MAKE_MOVE:
 	{
 		chess::Move move = *static_cast<const chess::Move*>(message->getBodyStart());
 		handleMove(message->fromID, move);
@@ -109,7 +112,7 @@ void ChessServer::handleNewConnection(uint32_t newClientId)
 	auto initPlayerMessage = std::make_shared<net::Message>(newClientId, MESSAGETYPE::INIT_GAME, data);
 	m_server->sendMessage(initPlayerMessage);
 
-	if (m_connectionIdToColor.size() == 2) 
+	if (m_connectionIdToColor.size() == 2)
 		broadCastCurrentGameState(MESSAGETYPE::START_GAME);
 }
 

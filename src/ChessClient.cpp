@@ -1,13 +1,16 @@
 #include "ChessClient.hpp"
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ini_parser.hpp>
 #include <GameModes/Chess.hpp>
 
 ChessClient::ChessClient()
 {
-	// TODO read ip from file
-	std::string ip = "127.0.0.1";
-	//std::string ip = "91.34.118.63";
-	uint16_t port = 2345;
+	boost::property_tree::ptree pt;
+	boost::property_tree::ini_parser::read_ini("ChessClientConfig.ini", pt);
+	auto ip = pt.get<std::string>("General.IP");
+	auto port = pt.get<uint16_t>("General.Port");
+
 	m_client = std::make_shared<net::TCPClient>(ip, port);
 }
 
