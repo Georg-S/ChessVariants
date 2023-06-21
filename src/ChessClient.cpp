@@ -56,6 +56,7 @@ void ChessClient::handleMessage(std::shared_ptr<net::Message> message)
 	case MESSAGETYPE::GAMESTATE_UPDATE:
 	{
 		m_game->setGameState(message->bodyToString());
+		m_game->deselectPiece();
 		return;
 	}
 	case MESSAGETYPE::PREVIOUS_MOVE:
@@ -107,15 +108,10 @@ void ChessClient::handleGame()
 	auto from = m_game->getSelectedPiecePosition();
 	assert(from);
 	chess::Move move = { *from, *selectedPos };
-	m_game->deselectPiece();
 
 	if (!m_game->isMovePossible(move)) 
-	{
 		return;
-	}
-	else 
-	{
-		auto makeMoveMessage = std::make_shared<net::Message>(net::SERVER, MESSAGETYPE::MAKE_MOVE, move);
-		m_client->sendMessage(makeMoveMessage);
-	}
+
+	auto makeMoveMessage = std::make_shared<net::Message>(net::SERVER, MESSAGETYPE::MAKE_MOVE, move);
+	m_client->sendMessage(makeMoveMessage);
 }

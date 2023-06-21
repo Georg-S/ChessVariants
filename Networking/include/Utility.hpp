@@ -23,8 +23,11 @@ namespace net
 		~Session();
 		void disconnect();
 		bool isConnected() const;
+		uint32_t id() const;
 
 		std::shared_ptr<tcp::socket> m_socket;
+
+	private:
 		uint32_t m_id;
 	};
 }

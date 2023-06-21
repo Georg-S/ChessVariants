@@ -29,3 +29,8 @@ bool net::Session::isConnected() const
 {
 	return m_socket->is_open();
 }
+
+uint32_t net::Session::id() const
+{
+	return m_id;
+}

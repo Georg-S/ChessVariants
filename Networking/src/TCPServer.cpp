@@ -66,7 +66,7 @@ void net::TCPServer::broadcastMessage(std::shared_ptr<Message> message, std::ini
 				bool ignoreMessage = false;
 				for (auto reference : ignoreIDs)
 				{
-					if (reference == session->m_id)
+					if (reference == session->id())
 					{
 						ignoreMessage = true;
 						break;
@@ -76,7 +76,7 @@ void net::TCPServer::broadcastMessage(std::shared_ptr<Message> message, std::ini
 					continue;
 
 				auto newMessage = std::make_shared<Message>(*message);
-				newMessage->setToID(session->m_id);
+				newMessage->setToID(session->id());
 				sendMessage(newMessage);
 			}
 		}
@@ -183,7 +183,7 @@ void net::TCPServer::readHeader(std::shared_ptr<Session> session)
 				return;
 			}
 			currentMessage->resize();
-			currentMessage->fromID = session->m_id; // TODO maybe only access through getter
+			currentMessage->fromID = session->id();
 
 			readBody(session, currentMessage);
 		}
