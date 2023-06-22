@@ -21,6 +21,7 @@ int main(int argc, char* argv[])
 		std::cout << "Error creating ChessServer: " << e.what() << std::endl;
 		return 0;
 	}
+
 	server->run();
 
 	return 0;

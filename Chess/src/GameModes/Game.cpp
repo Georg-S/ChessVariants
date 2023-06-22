@@ -6,6 +6,18 @@
 
 using namespace chess;
 
+std::string chess::gameModeToString(GAME_MODES gameMode)
+{
+	switch (gameMode)
+	{
+	case chess::GAME_MODES::NORMAL: return "NormalChess";
+	case chess::GAME_MODES::SWAP: return "SwapChess";
+	case chess::GAME_MODES::TRAP: return "TrapChess";
+	case chess::GAME_MODES::FOGOFWAR: return "FogOfWarChess";
+	default: assert(!"Unrecognized mode"); return "InvalidMode";
+	}
+}
+
 std::optional<Position> Game::getSelectedBoardPosition() const
 {
 	if (!m_mouse.isNewLeftClick())

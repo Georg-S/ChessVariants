@@ -9,8 +9,10 @@ namespace chess
 {
 	enum class GAME_MODES
 	{
-		NORMAL, SWAP
+		NORMAL, SWAP, TRAP, FOGOFWAR
 	};
+
+	std::string gameModeToString(GAME_MODES gameMode);
 
 	class Game
 	{

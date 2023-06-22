@@ -1,8 +1,30 @@
 #include "ChessServer.hpp"
 
+#include <regex>
+#include <filesystem>
+#include <iostream>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include <GameModes/Chess.hpp>
+
+static int getHighestFileNumber(const std::string& path)
+{
+	int highestExistingNumber = -1;
+	std::smatch baseMatch;
+	std::error_code ec;
+	for (const auto& entry : std::filesystem::directory_iterator(path, ec))
+	{
+		auto pathString = entry.path().string();
+		if (std::regex_search(pathString, baseMatch, std::regex("\\d+")))
+		{
+			int iteration = std::stoi(baseMatch[0]);
+			if (iteration >= highestExistingNumber)
+				highestExistingNumber = iteration;
+		}
+	}
+
+	return highestExistingNumber;
+}
 
 ChessServer::ChessServer()
 {
@@ -16,6 +38,7 @@ ChessServer::ChessServer()
 	m_game = std::make_unique<chess::Chess>("4k3/RR6/8/8/8/8/8/4K3 w - - 0 1"); // Todo handle different game modes etc.
 	m_server = std::make_unique<net::TCPServer>(ip, port);
 	m_server->setMaxAllowedConnections(MAX_ALLOWED_CONNECTIONS);
+	initGameLogging();
 }
 
 void ChessServer::run()
@@ -28,6 +51,22 @@ void ChessServer::run()
 		if (inMessage)
 			handleMessage(inMessage);
 	}
+}
+
+void ChessServer::initGameLogging()
+{
+	if (!std::filesystem::exists("GameLogs"))
+		std::filesystem::create_directory("GameLogs");
+
+	auto highestNumber = getHighestFileNumber("GameLogs/");
+	++highestNumber;
+	m_gameLog = std::ofstream("GameLogs/" + std::to_string(highestNumber) + "_" + chess::gameModeToString(m_gameMode) + ".txt");
+}
+
+void ChessServer::logCurrentGameState()
+{
+	auto currentGameState = m_game->getFenString();
+	m_gameLog <<  currentGameState << std::endl;
 }
 
 void ChessServer::handleMessage(std::shared_ptr<net::ServerMessage> message)
@@ -98,6 +137,7 @@ void ChessServer::handleMove(uint32_t clientId, const chess::Move& move)
 	m_game->makeMove(move);
 	broadCastCurrentGameState(MESSAGETYPE::GAMESTATE_UPDATE);
 	broadCastLastMove(move);
+	logCurrentGameState();
 }
 
 void ChessServer::handleNewConnection(uint32_t newClientId)
@@ -113,7 +153,7 @@ void ChessServer::handleNewConnection(uint32_t newClientId)
 	m_server->sendMessage(initPlayerMessage);
 
 	if (m_connectionIdToColor.size() == 2)
-		broadCastCurrentGameState(MESSAGETYPE::START_GAME);
+		startGame();
 }
 
 void ChessServer::broadCastCurrentGameState(MESSAGETYPE messageType)
@@ -126,4 +166,10 @@ void ChessServer::broadCastLastMove(const chess::Move& move)
 {
 	auto startGameMessage = std::make_shared<net::Message>(net::BROADCAST, MESSAGETYPE::PREVIOUS_MOVE, move);
 	m_server->broadcastMessage(startGameMessage);
+}
+
+void ChessServer::startGame()
+{
+	broadCastCurrentGameState(MESSAGETYPE::START_GAME);
+	logCurrentGameState();
 }
