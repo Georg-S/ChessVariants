@@ -25,6 +25,8 @@ private:
 	void broadCastCurrentGameState(MESSAGETYPE messageType);
 	void broadCastLastMove(const chess::Move& move);
 	void startGame();
+	virtual std::unique_ptr<chess::Game> createGame(chess::GAME_MODES gameMode);
+
 	std::shared_ptr<net::TCPServer> m_server;
 	static constexpr int MAX_ALLOWED_CONNECTIONS = 2;
 	std::unique_ptr<chess::Game> m_game;

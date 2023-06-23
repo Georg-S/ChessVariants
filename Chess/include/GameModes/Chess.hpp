@@ -8,6 +8,7 @@ namespace chess
 	{
 	public:
 		Chess(const std::string& fenString = defaultStartPos);
+		virtual ~Chess() = default;
 		virtual void enableRendering() override;
 		virtual bool update() override; // Returns true if the window is still open
 		virtual bool isMovePossible(const Move& move) const override;
@@ -15,8 +16,8 @@ namespace chess
 		virtual bool isGameOver() const override;
 		virtual void setPreviousMove(const Move& move) override;
 
-	private:
-		void updateRenderInfo();
+	protected:
+		virtual void updateRenderInfo();
 
 		RenderInformation m_renderInfo;
 		Renderer m_renderer;

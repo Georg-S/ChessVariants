@@ -20,6 +20,7 @@ set(PIECES_HEADER
 set(GAMEMODES_HEADER
 	"include/GameModes/Game.hpp"
 	"include/GameModes/Chess.hpp"
+	"include/GameModes/SwapChess.hpp"
 	)
 
 set(CHESS_HEADER
@@ -48,6 +49,7 @@ set(PIECES_SOURCE
 set(GAMEMODES_SOURCE
 	"src/GameModes/Game.cpp"
 	"src/GameModes/Chess.cpp"
+	"src/GameModes/SwapChess.cpp"
 	)
 
 set(CHESS_SOURCE

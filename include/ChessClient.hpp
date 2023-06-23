@@ -15,6 +15,7 @@ public:
 private:
 	void handleMessage(std::shared_ptr<net::Message> message);
 	void handleGame();
+	virtual std::unique_ptr<chess::Game> createGame(chess::GAME_MODES gameMode);
 
 	std::shared_ptr<net::TCPClient> m_client;
 	chess::PieceColor m_playerColor = chess::PieceColor::NONE;

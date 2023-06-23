@@ -41,6 +41,7 @@ namespace chess
 		void setEnPassantPossibility(const Position& position);
 		void removePiece(const Position& position);
 		void replacePiece(const Position& position, char fenCharacter);
+		void swapPieces(const Move& move);
 
 	private:
 		std::string getPiecesFenString() const;

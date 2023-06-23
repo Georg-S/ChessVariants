@@ -148,6 +148,18 @@ void chess::Board::replacePiece(const Position& position, char fenCharacter)
 	m_board[position.x][position.y] = createPieceFromFenCharacter(fenCharacter);
 }
 
+void chess::Board::swapPieces(const Move& move)
+{
+	if (!m_board[move.from.x][move.from.y] || !m_board[move.to.x][move.to.y])
+		return;
+
+	auto fromPiece = std::move(m_board[move.from.x][move.from.y]);
+	auto toPiece = std::move(m_board[move.to.x][move.to.y]);
+
+	m_board[move.from.x][move.from.y] = std::move(toPiece);
+	m_board[move.to.x][move.to.y] = std::move(fromPiece);
+}
+
 std::string Board::getPiecesFenString() const
 {
 	std::string result;

@@ -3,6 +3,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include <GameModes/Chess.hpp>
+#include <GameModes/SwapChess.hpp>
 
 ChessClient::ChessClient()
 {
@@ -46,7 +47,7 @@ void ChessClient::handleMessage(std::shared_ptr<net::Message> message)
 	{
 		assert(m_playerColor != chess::PieceColor::NONE);
 		auto gameState = message->bodyToString();
-		m_game = std::make_unique<chess::Chess>(gameState); // TODO handle different game modes
+		m_game = createGame(m_gameMode);
 		m_game->enableRendering();
 		m_runGame = true;
 
@@ -114,4 +115,21 @@ void ChessClient::handleGame()
 
 	auto makeMoveMessage = std::make_shared<net::Message>(net::SERVER, MESSAGETYPE::MAKE_MOVE, move);
 	m_client->sendMessage(makeMoveMessage);
+}
+
+std::unique_ptr<chess::Game> ChessClient::createGame(chess::GAME_MODES gameMode) // TODO maybe move into its own file so Server and Client can share this code
+{
+	switch (gameMode)
+	{
+	case chess::GAME_MODES::NORMAL:	return std::make_unique<chess::Chess>();
+	case chess::GAME_MODES::SWAP:	return std::make_unique<chess::SwapChess>();
+	case chess::GAME_MODES::TRAP:
+		break;
+	case chess::GAME_MODES::FOGOFWAR:
+		break;
+	default:
+		break;
+	}
+	assert(!"Unrecognized game mode");
+	return nullptr;
 }

@@ -6,6 +6,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include <GameModes/Chess.hpp>
+#include <GameModes/SwapChess.hpp>
 
 static int getHighestFileNumber(const std::string& path)
 {
@@ -35,7 +36,8 @@ ChessServer::ChessServer()
 	auto gameModeBuf = pt.get<int>("General.GameMode");
 	m_gameMode = chess::GAME_MODES(gameModeBuf);
 
-	m_game = std::make_unique<chess::Chess>("4k3/RR6/8/8/8/8/8/4K3 w - - 0 1"); // Todo handle different game modes etc.
+	// "4k3/RR6/8/8/8/8/8/4K3 w - - 0 1"
+	m_game = createGame(m_gameMode); // Todo handle different game modes etc.
 	m_server = std::make_unique<net::TCPServer>(ip, port);
 	m_server->setMaxAllowedConnections(MAX_ALLOWED_CONNECTIONS);
 	initGameLogging();
@@ -172,4 +174,21 @@ void ChessServer::startGame()
 {
 	broadCastCurrentGameState(MESSAGETYPE::START_GAME);
 	logCurrentGameState();
+}
+
+std::unique_ptr<chess::Game> ChessServer::createGame(chess::GAME_MODES gameMode)
+{
+	switch (gameMode)
+	{
+	case chess::GAME_MODES::NORMAL:	return std::make_unique<chess::Chess>();
+	case chess::GAME_MODES::SWAP:	return std::make_unique<chess::SwapChess>();
+	case chess::GAME_MODES::TRAP:
+		break;
+	case chess::GAME_MODES::FOGOFWAR:
+		break;
+	default:
+		break;
+	}
+	assert(!"Unrecognized game mode");
+	return nullptr;
 }
