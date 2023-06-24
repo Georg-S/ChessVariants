@@ -4,6 +4,7 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <GameModes/Chess.hpp>
 #include <GameModes/SwapChess.hpp>
+#include <GameModes/FogOfWarChess.hpp>
 
 ChessClient::ChessClient()
 {
@@ -125,8 +126,7 @@ std::unique_ptr<chess::Game> ChessClient::createGame(chess::GAME_MODES gameMode)
 	case chess::GAME_MODES::SWAP:	return std::make_unique<chess::SwapChess>();
 	case chess::GAME_MODES::TRAP:
 		break;
-	case chess::GAME_MODES::FOGOFWAR:
-		break;
+	case chess::GAME_MODES::FOGOFWAR: return std::make_unique<chess::FogOfWarChess>(m_playerColor);
 	default:
 		break;
 	}

@@ -24,14 +24,15 @@ namespace chess {
 	{
 	public:
 		Renderer();
-		void start();
-		void renderBoard(const std::string& fenBoardString);
-		void renderBoard(const chess::Board& board);
-		void render(const RenderInformation& renderInfo);
-		bool isQuit() const;
-		void close();
+		virtual ~Renderer() = default;
+		virtual void start();
+		virtual void renderBoard(const std::string& fenBoardString);
+		virtual void renderBoard(const chess::Board& board);
+		virtual void render(const RenderInformation& renderInfo);
+		virtual bool isQuit() const;
+		virtual void close();
 
-	private:
+	protected:
 		void renderNormalGameState(const RenderInformation& renderInfo);
 		void renderChessBoard();
 		void renderPieces(const chess::Board& board);

@@ -7,6 +7,7 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <GameModes/Chess.hpp>
 #include <GameModes/SwapChess.hpp>
+#include <GameModes/FogOfWarChess.hpp>
 
 static int getHighestFileNumber(const std::string& path)
 {
@@ -184,8 +185,8 @@ std::unique_ptr<chess::Game> ChessServer::createGame(chess::GAME_MODES gameMode)
 	case chess::GAME_MODES::SWAP:	return std::make_unique<chess::SwapChess>();
 	case chess::GAME_MODES::TRAP:
 		break;
-	case chess::GAME_MODES::FOGOFWAR:
-		break;
+	// The server doesn't render the game therefore the color doesn't matter
+	case chess::GAME_MODES::FOGOFWAR: return std::make_unique<chess::FogOfWarChess>(chess::PieceColor::NONE); 
 	default:
 		break;
 	}

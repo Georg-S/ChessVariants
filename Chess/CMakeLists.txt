@@ -21,6 +21,7 @@ set(GAMEMODES_HEADER
 	"include/GameModes/Game.hpp"
 	"include/GameModes/Chess.hpp"
 	"include/GameModes/SwapChess.hpp"
+	"include/GameModes/FogOfWarChess.hpp"
 	)
 
 set(CHESS_HEADER
@@ -50,6 +51,7 @@ set(GAMEMODES_SOURCE
 	"src/GameModes/Game.cpp"
 	"src/GameModes/Chess.cpp"
 	"src/GameModes/SwapChess.cpp"
+	"src/GameModes/FogOfWarChess.cpp"
 	)
 
 set(CHESS_SOURCE

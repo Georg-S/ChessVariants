@@ -4,6 +4,7 @@
 
 namespace chess 
 {
+	bool isIndexInsideBoardBoundaries(const Position& position);
 	PieceColor getNextPlayer(PieceColor player);
 	void makeMove(Board* inOutBoard, const Move& move);
 	bool isCheck(const Board& board, PieceColor color);

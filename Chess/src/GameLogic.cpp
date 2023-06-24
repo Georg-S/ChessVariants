@@ -29,6 +29,16 @@ static std::optional<Position> getKingPosition(const Board& board, PieceColor co
     return std::nullopt;
 }
 
+bool chess::isIndexInsideBoardBoundaries(const Position& position)
+{
+    if (position.x < 0 || position.x >= BOARD_WIDTH)
+        return false;
+    if (position.y < 0 || position.y >= BOARD_HEIGHT)
+        return false;
+    return true;
+}
+
+
 PieceColor chess::getNextPlayer(PieceColor player) 
 {
     assert(player != PieceColor::NONE);
