@@ -77,7 +77,7 @@ void ChessServer::initGameLogging()
 
 void ChessServer::logCurrentGameState()
 {
-	auto currentGameState = m_game->getFenString();
+	auto currentGameState = m_game->getGameState();
 	m_gameLog <<  currentGameState << std::endl;
 }
 
@@ -145,7 +145,7 @@ void ChessServer::handlePromotion(uint32_t clientId, const chess::Position& posi
 void ChessServer::handlePositionSelected(uint32_t clientId, const chess::Position& position)
 {
 	if (m_gameMode != chess::GAME_MODES::TRAP)
-		return; // Currently only trap chess uses this kind of message to prepar the game
+		return; // Currently only trap chess uses this kind of message to prepare the game
 
 	auto trapChess = dynamic_cast<chess::TrapChess*>(m_game.get());
 	trapChess->placeBomb(position, m_connectionIdToColor[clientId]);
@@ -186,7 +186,7 @@ void ChessServer::handleNewConnection(uint32_t newClientId)
 
 void ChessServer::broadCastCurrentGameState(MESSAGETYPE messageType)
 {
-	auto startGameMessage = std::make_shared<net::Message>(net::BROADCAST, messageType, m_game->getFenString());
+	auto startGameMessage = std::make_shared<net::Message>(net::BROADCAST, messageType, m_game->getGameState());
 	m_server->broadcastMessage(startGameMessage);
 }
 

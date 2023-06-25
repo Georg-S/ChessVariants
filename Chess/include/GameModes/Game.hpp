@@ -27,6 +27,7 @@ namespace chess
 		virtual void setGameState(const std::string& fenString);
 		virtual void pawnPromotion(const Position& selectedPromotionPiece);
 		virtual bool isGameReady() const;
+		virtual std::string getGameState() const;
 
 		std::optional<Position> getSelectedBoardPosition() const;
 		std::optional<Position> getSelectedPromotionPosition() const;
@@ -36,9 +37,9 @@ namespace chess
 		void deselectPiece();
 		bool isPieceSelected() const;
 		bool isInPromotion() const;
-		std::string getFenString() const;
 
 	protected:
+		std::string getFenString() const;
 		char getPieceFromPromotion(const Position& pos) const;
 
 		std::optional<Position> m_selectedPiece;

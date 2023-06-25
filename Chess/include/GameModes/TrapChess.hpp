@@ -35,12 +35,15 @@ namespace chess
 		virtual void makeMove(const Move& move) override;
 		virtual bool isGameOver() const override;
 		virtual void setPreviousMove(const Move& move) override;
+		virtual void setGameState(const std::string& fenString) override;
+		virtual std::string getGameState() const override;
 
 		virtual bool isGameReady() const override;
 		void placeBomb(const Position& pos, PieceColor color);
 
 	private:
 		void updateRenderInfo();
+		static std::vector<Position> getBombPositions(const std::array<std::array<bool, BOARD_HEIGHT>, BOARD_WIDTH>& bombs);
 
 		static constexpr int MaxAllowedBombsPerPlayer = 3;
 		std::array<std::array<bool, BOARD_HEIGHT>, BOARD_WIDTH> m_blackPlayerBomb = {};

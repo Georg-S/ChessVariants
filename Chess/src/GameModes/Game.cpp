@@ -77,6 +77,11 @@ bool chess::Game::isGameReady() const
 	return true;
 }
 
+std::string chess::Game::getGameState() const
+{
+	return getFenString();
+}
+
 void Game::selectPiece(const Position& pos)
 {
 	if (m_board.isOccupied(pos) && (m_board[pos]->getColor() == m_currentPlayer))

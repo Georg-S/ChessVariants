@@ -2,6 +2,7 @@
 
 #include <cassert>
 
+#include "Utility.hpp"
 #include "GameLogic.hpp"
 
 using namespace chess;
@@ -202,6 +203,57 @@ void chess::TrapChess::setPreviousMove(const Move& move)
 	m_renderInfo.previousMove = move;
 }
 
+void chess::TrapChess::setGameState(const std::string& fenString)
+{
+	auto setBombFromString = [this](auto& bombsArr, const std::string& bombStr) 
+	{
+		auto pos = toPositionFromChessString(bombStr);
+		if (!pos)
+			return;
+
+		bombsArr[pos->x][pos->y] = true;
+	};
+
+	auto splitted = stringSplit(fenString, " ");
+	Game::setGameState(fenString);
+
+	for (size_t i = 4; i < splitted.size(); i++) 
+	{
+		if (i < 4 + MaxAllowedBombsPerPlayer)
+			setBombFromString(m_whitePlayerBomb, splitted[i]);
+		else if(i < 4 + 2 * MaxAllowedBombsPerPlayer)
+			setBombFromString(m_blackPlayerBomb, splitted[i]);
+	}
+}
+
+std::string chess::TrapChess::getGameState() const
+{
+	auto getBombString = [this](const auto& bombsArr) 
+	{
+		std::string result;
+		int count = 0;
+		auto bombs = getBombPositions(bombsArr);
+		for (const auto& bomb : bombs) 
+		{
+			result += " " + toChessPositionString(bomb);
+			count++;
+		}
+
+		while (count < 3) 
+		{
+			result += " -";
+			count++;
+		}
+
+		return result;
+	};
+
+	auto boardStateStr = m_board.getFenString(m_currentPlayer);
+	auto resultStr = boardStateStr + getBombString(m_whitePlayerBomb) + getBombString(m_blackPlayerBomb);
+
+	return resultStr;
+}
+
 bool chess::TrapChess::isGameReady() const
 {
 	return m_gameReady;
@@ -244,22 +296,6 @@ void chess::TrapChess::placeBomb(const Position& pos, PieceColor color)
 
 void chess::TrapChess::updateRenderInfo()
 {
-	auto getBombPositions = [this](auto playerBombs)
-	{
-		std::vector<Position> result;
-
-		for (int x = 0; x < BOARD_WIDTH; x++)
-		{
-			for (int y = 0; y < BOARD_HEIGHT; y++)
-			{
-				if (playerBombs[x][y])
-					result.emplace_back(Position{ x,y });
-			}
-		}
-
-		return result;
-	};
-
 	m_renderInfo.board = m_board.getDeepCopy();
 	m_renderInfo.positionToRenderOnMousePosition = m_selectedPiece;
 	m_renderInfo.mousePos = { m_mouse.getMousePositionX(), m_mouse.getMousePositionY() };
@@ -279,4 +315,20 @@ void chess::TrapChess::updateRenderInfo()
 		m_renderInfo.playerWon = PieceColor::BLACK;
 	else if (isStaleMate(m_board, m_currentPlayer))
 		m_renderInfo.playerWon = PieceColor::NONE;
+}
+
+std::vector<Position> chess::TrapChess::getBombPositions(const std::array<std::array<bool, BOARD_HEIGHT>, BOARD_WIDTH>& bombs)
+{
+	std::vector<Position> result;
+
+	for (int x = 0; x < BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < BOARD_HEIGHT; y++)
+		{
+			if (bombs[x][y])
+				result.emplace_back(Position{ x,y });
+		}
+	}
+
+	return result;
 }
