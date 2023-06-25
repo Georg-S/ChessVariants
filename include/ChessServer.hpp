@@ -20,6 +20,7 @@ private:
 	void logCurrentGameState();
 	void handleMessage(std::shared_ptr<net::ServerMessage> message);
 	void handlePromotion(uint32_t clientId, const chess::Position& position);
+	void handlePositionSelected(uint32_t clientId, const chess::Position& position);
 	void handleMove(uint32_t clientId, const chess::Move& move);
 	void handleNewConnection(uint32_t newClientId);
 	void broadCastCurrentGameState(MESSAGETYPE messageType);
@@ -33,4 +34,5 @@ private:
 	chess::GAME_MODES m_gameMode = chess::GAME_MODES::NORMAL;
 	std::map<uint32_t, chess::PieceColor> m_connectionIdToColor;
 	std::ofstream m_gameLog;
+	bool m_gameCanBeStarted = true;
 };

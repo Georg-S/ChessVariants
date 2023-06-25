@@ -26,6 +26,7 @@ namespace chess
 		virtual void setPreviousMove(const Move& move) = 0;
 		virtual void setGameState(const std::string& fenString);
 		virtual void pawnPromotion(const Position& selectedPromotionPiece);
+		virtual bool isGameReady() const;
 
 		std::optional<Position> getSelectedBoardPosition() const;
 		std::optional<Position> getSelectedPromotionPosition() const;

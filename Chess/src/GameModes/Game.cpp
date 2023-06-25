@@ -72,6 +72,11 @@ void chess::Game::pawnPromotion(const Position& selectedPromotionPiece)
 	m_currentPlayer = getNextPlayer(m_currentPlayer);
 }
 
+bool chess::Game::isGameReady() const
+{
+	return true;
+}
+
 void Game::selectPiece(const Position& pos)
 {
 	if (m_board.isOccupied(pos) && (m_board[pos]->getColor() == m_currentPlayer))

@@ -10,25 +10,6 @@ static bool isKing(const Piece* piece)
     return tolower(piece->getFenCharacter()) == 'k';
 }
 
-static std::optional<Position> getKingPosition(const Board& board, PieceColor color) 
-{
-    Position pos = {};
-    for (pos.x = 0; pos.x < BOARD_WIDTH; pos.x++)
-    {
-        for (pos.y = 0; pos.y < BOARD_HEIGHT; pos.y++)
-        {
-            auto piece = board[pos];
-            if (!piece || color != piece->getColor())
-                continue;
-
-            if (isKing(piece))
-                return pos;
-        }
-    }
-
-    return std::nullopt;
-}
-
 bool chess::isIndexInsideBoardBoundaries(const Position& position)
 {
     if (position.x < 0 || position.x >= BOARD_WIDTH)
@@ -261,6 +242,25 @@ std::optional<PieceColor> chess::getPromotionSelectionColor(const Board& board)
     auto pos = getPromotionPawnPosition(board);
     if (pos)
         return board[*pos]->getColor();
+    return std::nullopt;
+}
+
+std::optional<Position> chess::getKingPosition(const Board& board, PieceColor color)
+{
+    Position pos = {};
+    for (pos.x = 0; pos.x < BOARD_WIDTH; pos.x++)
+    {
+        for (pos.y = 0; pos.y < BOARD_HEIGHT; pos.y++)
+        {
+            auto piece = board[pos];
+            if (!piece || color != piece->getColor())
+                continue;
+
+            if (isKing(piece))
+                return pos;
+        }
+    }
+
     return std::nullopt;
 }
 

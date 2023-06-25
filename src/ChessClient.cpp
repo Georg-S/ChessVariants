@@ -5,6 +5,7 @@
 #include <GameModes/Chess.hpp>
 #include <GameModes/SwapChess.hpp>
 #include <GameModes/FogOfWarChess.hpp>
+#include <GameModes/TrapChess.hpp>
 
 ChessClient::ChessClient()
 {
@@ -80,6 +81,12 @@ void ChessClient::handleGame()
 		return;
 
 	m_game->update();
+	if (!m_game->isGameReady()) 
+	{
+		handleGamePreparation();
+		return;
+	}
+
 	if (m_playerColor != m_game->getCurrentPlayer())
 		return;
 
@@ -124,12 +131,23 @@ std::unique_ptr<chess::Game> ChessClient::createGame(chess::GAME_MODES gameMode)
 	{
 	case chess::GAME_MODES::NORMAL:	return std::make_unique<chess::Chess>();
 	case chess::GAME_MODES::SWAP:	return std::make_unique<chess::SwapChess>();
-	case chess::GAME_MODES::TRAP:
-		break;
+	case chess::GAME_MODES::TRAP:	return std::make_unique<chess::TrapChess>(m_playerColor);
 	case chess::GAME_MODES::FOGOFWAR: return std::make_unique<chess::FogOfWarChess>(m_playerColor);
 	default:
 		break;
 	}
 	assert(!"Unrecognized game mode");
 	return nullptr;
+}
+
+void ChessClient::handleGamePreparation()
+{
+	if (m_gameMode == chess::GAME_MODES::TRAP) 
+	{
+		auto pos = m_game->getSelectedBoardPosition();
+		if (!pos)
+			return;
+		auto selectedBombPosition = std::make_shared<net::Message>(net::SERVER, MESSAGETYPE::POSITION_SELECTED, *pos);
+		m_client->sendMessage(selectedBombPosition);
+	}
 }

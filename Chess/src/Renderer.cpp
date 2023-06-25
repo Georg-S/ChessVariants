@@ -3,7 +3,6 @@
 #include <cassert>
 #include "GameLogic.hpp"
 
-static const std::string basePath = "Images/";
 
 chess::Renderer::Renderer()
 {

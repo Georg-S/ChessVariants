@@ -17,5 +17,6 @@ namespace chess
 	std::vector<Move> getAllPossibleMoves(const Board& board, PieceColor color);
 	std::vector<Move> getAllPossibleMoves(const Board& board, const Position& piecePosition);
 	std::optional<PieceColor> getPromotionSelectionColor(const Board& board);
+	std::optional<Position> getKingPosition(const Board& board, PieceColor color);
 	void executePromotion(Board* inOutBoard, char selectedFenCharPiece);
 }

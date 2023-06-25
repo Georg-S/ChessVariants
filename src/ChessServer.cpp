@@ -8,6 +8,7 @@
 #include <GameModes/Chess.hpp>
 #include <GameModes/SwapChess.hpp>
 #include <GameModes/FogOfWarChess.hpp>
+#include <GameModes/TrapChess.hpp>
 
 static int getHighestFileNumber(const std::string& path)
 {
@@ -28,6 +29,13 @@ static int getHighestFileNumber(const std::string& path)
 	return highestExistingNumber;
 }
 
+static bool doesGameModeRequirePreparation(chess::GAME_MODES gameMode) 
+{
+	if (gameMode == chess::GAME_MODES::TRAP)
+		return true;
+	return false;
+}
+
 ChessServer::ChessServer()
 {
 	boost::property_tree::ptree pt;
@@ -36,9 +44,10 @@ ChessServer::ChessServer()
 	auto port = pt.get<uint16_t>("General.Port");
 	auto gameModeBuf = pt.get<int>("General.GameMode");
 	m_gameMode = chess::GAME_MODES(gameModeBuf);
+	m_gameCanBeStarted = !doesGameModeRequirePreparation(m_gameMode);
 
 	// "4k3/RR6/8/8/8/8/8/4K3 w - - 0 1"
-	m_game = createGame(m_gameMode); // Todo handle different game modes etc.
+	m_game = createGame(m_gameMode);
 	m_server = std::make_unique<net::TCPServer>(ip, port);
 	m_server->setMaxAllowedConnections(MAX_ALLOWED_CONNECTIONS);
 	initGameLogging();
@@ -111,6 +120,12 @@ void ChessServer::handleMessage(std::shared_ptr<net::ServerMessage> message)
 		handlePromotion(message->fromID, position);
 		break;
 	}
+	case MESSAGETYPE::POSITION_SELECTED:
+	{
+		chess::Position position = *static_cast<const chess::Position*>(message->getBodyStart());
+		handlePositionSelected(message->fromID, position);
+		break;
+	}
 	default:
 		assert(!"Unhandled message");
 		break;
@@ -124,6 +139,16 @@ void ChessServer::handlePromotion(uint32_t clientId, const chess::Position& posi
 		return;
 
 	m_game->pawnPromotion(position);
+	broadCastCurrentGameState(MESSAGETYPE::GAMESTATE_UPDATE);
+}
+
+void ChessServer::handlePositionSelected(uint32_t clientId, const chess::Position& position)
+{
+	if (m_gameMode != chess::GAME_MODES::TRAP)
+		return; // Currently only trap chess uses this kind of message to prepar the game
+
+	auto trapChess = dynamic_cast<chess::TrapChess*>(m_game.get());
+	trapChess->placeBomb(position, m_connectionIdToColor[clientId]);
 	broadCastCurrentGameState(MESSAGETYPE::GAMESTATE_UPDATE);
 }
 
@@ -183,8 +208,8 @@ std::unique_ptr<chess::Game> ChessServer::createGame(chess::GAME_MODES gameMode)
 	{
 	case chess::GAME_MODES::NORMAL:	return std::make_unique<chess::Chess>();
 	case chess::GAME_MODES::SWAP:	return std::make_unique<chess::SwapChess>();
-	case chess::GAME_MODES::TRAP:
-		break;
+	// The server doesn't render the game therefore the color doesn't matter
+	case chess::GAME_MODES::TRAP:	return std::make_unique<chess::TrapChess>(chess::PieceColor::NONE);
 	// The server doesn't render the game therefore the color doesn't matter
 	case chess::GAME_MODES::FOGOFWAR: return std::make_unique<chess::FogOfWarChess>(chess::PieceColor::NONE); 
 	default:
