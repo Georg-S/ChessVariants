@@ -167,7 +167,9 @@ void chess::TrapChess::makeMove(const Move& move)
 
 	// TODO bomb moving on castling
 
-	auto handleBombs = [this, &toCheckTrapPosition, &move](auto currentPlayerBombs, auto otherPlayerBombs)
+	::makeMove(&m_board, move);
+
+	auto handleBombs = [this, &toCheckTrapPosition, &move](auto& currentPlayerBombs, auto& otherPlayerBombs)
 	{
 		currentPlayerBombs[move.to.x][move.to.y] = currentPlayerBombs[move.from.x][move.from.y];
 		currentPlayerBombs[move.from.x][move.from.y] = false;
@@ -206,6 +208,9 @@ void chess::TrapChess::setPreviousMove(const Move& move)
 
 void chess::TrapChess::setGameState(const std::string& fenString)
 {
+	m_blackPlayerBomb = {};
+	m_whitePlayerBomb = {};
+
 	auto setBombFromString = [this](auto& bombsArr, const std::string& bombStr) 
 	{
 		auto pos = toPositionFromChessString(bombStr);
