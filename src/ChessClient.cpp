@@ -36,7 +36,7 @@ void ChessClient::handleMessage(std::shared_ptr<net::Message> message)
 {
 	switch (MESSAGETYPE(message->header.messageType))
 	{
-	case MESSAGETYPE::INIT_GAME:
+	case MESSAGETYPE::INIT_PLAYER:
 	{
 		const InitMessageData* data = static_cast<const InitMessageData*>(message->getBodyStart());
 		m_playerColor = data->playerColor;
@@ -45,14 +45,19 @@ void ChessClient::handleMessage(std::shared_ptr<net::Message> message)
 
 		return;
 	}
+	case MESSAGETYPE::BOTH_PLAYER_CONNECTED:
+	{
+		m_game = createGame(m_gameMode);
+		m_game->setGameState(message->bodyToString());
+		m_game->enableRendering();
+		m_runGame = true;
+		break;
+	}
 	case MESSAGETYPE::START_GAME: 
 	{
 		assert(m_playerColor != chess::PieceColor::NONE);
-		auto gameState = message->bodyToString();
-		m_game = createGame(m_gameMode);
-		m_game->enableRendering();
-		m_runGame = true;
-
+		m_game->setGameReady(true);
+		m_game->setGameState(message->bodyToString());
 		std::cout << "Start game Message received" << std::endl;
 		return;
 	}

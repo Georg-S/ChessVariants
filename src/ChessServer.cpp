@@ -147,9 +147,15 @@ void ChessServer::handlePositionSelected(uint32_t clientId, const chess::Positio
 	if (m_gameMode != chess::GAME_MODES::TRAP)
 		return; // Currently only trap chess uses this kind of message to prepare the game
 
+	if (m_game->isGameReady())
+		return;
+
 	auto trapChess = dynamic_cast<chess::TrapChess*>(m_game.get());
 	trapChess->placeBomb(position, m_connectionIdToColor[clientId]);
 	broadCastCurrentGameState(MESSAGETYPE::GAMESTATE_UPDATE);
+
+	if (trapChess->isGameReady())
+		startGame();
 }
 
 void ChessServer::handleMove(uint32_t clientId, const chess::Move& move)
@@ -177,11 +183,15 @@ void ChessServer::handleNewConnection(uint32_t newClientId)
 	m_connectionIdToColor.emplace(newClientId, newConnectionColor);
 
 	InitMessageData data{ newConnectionColor, m_gameMode };
-	auto initPlayerMessage = std::make_shared<net::Message>(newClientId, MESSAGETYPE::INIT_GAME, data);
+	auto initPlayerMessage = std::make_shared<net::Message>(newClientId, MESSAGETYPE::INIT_PLAYER, data);
 	m_server->sendMessage(initPlayerMessage);
 
-	if (m_connectionIdToColor.size() == 2)
-		startGame();
+	if (m_connectionIdToColor.size() == 2) 
+	{
+		broadCastCurrentGameState(MESSAGETYPE::BOTH_PLAYER_CONNECTED);
+		if (m_game->isGameReady()) 
+			startGame();
+	}
 }
 
 void ChessServer::broadCastCurrentGameState(MESSAGETYPE messageType)

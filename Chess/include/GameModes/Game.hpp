@@ -29,6 +29,7 @@ namespace chess
 		virtual bool isGameReady() const;
 		virtual std::string getGameState() const;
 
+		void setGameReady(bool ready);
 		std::optional<Position> getSelectedBoardPosition() const;
 		std::optional<Position> getSelectedPromotionPosition() const;
 		std::optional<Position> getSelectedPiecePosition() const;
@@ -42,6 +43,7 @@ namespace chess
 		std::string getFenString() const;
 		char getPieceFromPromotion(const Position& pos) const;
 
+		bool m_isGameReady = true;
 		std::optional<Position> m_selectedPiece;
 		PieceColor m_currentPlayer;
 		Board m_board;

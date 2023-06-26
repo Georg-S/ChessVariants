@@ -38,7 +38,6 @@ namespace chess
 		virtual void setGameState(const std::string& fenString) override;
 		virtual std::string getGameState() const override;
 
-		virtual bool isGameReady() const override;
 		void placeBomb(const Position& pos, PieceColor color);
 
 	private:
@@ -49,7 +48,6 @@ namespace chess
 		std::array<std::array<bool, BOARD_HEIGHT>, BOARD_WIDTH> m_blackPlayerBomb = {};
 		std::array<std::array<bool, BOARD_HEIGHT>, BOARD_WIDTH> m_whitePlayerBomb = {};
 		PieceColor m_playerPerspective;
-		bool m_gameReady = false;
 		TrapChessRenderer m_renderer;
 		TrapChessRenderingInformation m_renderInfo;
 	};

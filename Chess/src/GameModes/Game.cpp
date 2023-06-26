@@ -18,6 +18,11 @@ std::string chess::gameModeToString(GAME_MODES gameMode)
 	}
 }
 
+void chess::Game::setGameReady(bool ready)
+{
+	m_isGameReady = ready;
+}
+
 std::optional<Position> Game::getSelectedBoardPosition() const
 {
 	if (!m_mouse.isNewLeftClick())
@@ -74,7 +79,7 @@ void chess::Game::pawnPromotion(const Position& selectedPromotionPiece)
 
 bool chess::Game::isGameReady() const
 {
-	return true;
+	return m_isGameReady;
 }
 
 std::string chess::Game::getGameState() const

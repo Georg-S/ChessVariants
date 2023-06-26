@@ -110,6 +110,7 @@ void chess::TrapChessRenderer::renderPiecesWithSelectedOnMousePositionWithBombs(
 chess::TrapChess::TrapChess(PieceColor playerColor)
 	: m_playerPerspective(playerColor)
 {
+	m_isGameReady = false; // Bombs must be placed first before the game can be played
 	setGameState(defaultStartPos);
 }
 
@@ -254,11 +255,6 @@ std::string chess::TrapChess::getGameState() const
 	return resultStr;
 }
 
-bool chess::TrapChess::isGameReady() const
-{
-	return m_gameReady;
-}
-
 static int getCount(const std::array<std::array<bool, BOARD_HEIGHT>, BOARD_WIDTH>& arr)
 {
 	int count = 0;
@@ -291,7 +287,7 @@ void chess::TrapChess::placeBomb(const Position& pos, PieceColor color)
 	}
 
 	if (getCount(m_whitePlayerBomb) == MaxAllowedBombsPerPlayer && getCount(m_blackPlayerBomb) == MaxAllowedBombsPerPlayer)
-		m_gameReady = true;
+		m_isGameReady = true;
 }
 
 void chess::TrapChess::updateRenderInfo()
