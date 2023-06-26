@@ -31,7 +31,7 @@ void chess::TrapChessRenderer::renderTrapChess(const TrapChessRenderingInformati
 
 	if (renderInfo.positionToRenderOnMousePosition && renderInfo.mousePos)
 	{
-		renderPiecesWithSelectedOnMousePosition(renderInfo.board, *renderInfo.mousePos, *renderInfo.positionToRenderOnMousePosition);
+		renderPiecesWithSelectedOnMousePositionWithBombs(renderInfo);
 		renderAllPossibleMovesForSelectedPiece(renderInfo.board, *renderInfo.positionToRenderOnMousePosition);
 	}
 	else
@@ -56,19 +56,18 @@ void chess::TrapChessRenderer::renderBombsExceptSelected(const std::vector<Posit
 
 void chess::TrapChessRenderer::renderBomb(const Position& pos)
 {
-	const int offsetX = 0; // TODO move bomb into the right spot
-	const int offsetY = 0; // TODO move bomb into the right spot
-
-	renderBomb(PIECE_WIDTH * pos.x, PIECE_HEIGHT * pos.y);
+	renderBombWithAppliedOffset(PIECE_WIDTH * pos.x, PIECE_HEIGHT * pos.y);
 }
 
-void chess::TrapChessRenderer::renderBomb(int windowX, int windowY)
+void chess::TrapChessRenderer::renderBombWithAppliedOffset(int windowX, int windowY)
 {
-	static constexpr int BOMB_WIDTH = PIECE_WIDTH / 2;
-	static constexpr int BOMB_HEIGHT = PIECE_HEIGHT / 2;
+	static constexpr int BOMB_WIDTH = static_cast<int>(PIECE_WIDTH / 1.3);
+	static constexpr int BOMB_HEIGHT = static_cast<int>(PIECE_HEIGHT / 1.3);
+	const int offsetX = -PIECE_WIDTH / 8;
+	const int offsetY = -PIECE_HEIGHT / 8;
 
 	const std::string fileString = basePath + "bomb.png";
-	m_sdlHandler->createAndPushBackRenderElement(fileString, windowX, windowY, PIECE_WIDTH, PIECE_HEIGHT);
+	m_sdlHandler->createAndPushBackRenderElement(fileString, windowX + offsetX, windowY + offsetY, BOMB_WIDTH, BOMB_HEIGHT);
 }
 
 static bool isBombSelected(const std::vector<Position>& bombs, const Position& pos)
@@ -104,7 +103,7 @@ void chess::TrapChessRenderer::renderPiecesWithSelectedOnMousePositionWithBombs(
 	renderBombsExceptSelected(renderInfo.bombPositions, selectedPiece);
 	render_piece_on_mouse_position(foreGroundPiece, *renderInfo.mousePos);
 	if (isBombSelected(renderInfo.bombPositions, selectedPiece))
-		renderBomb(renderInfo.mousePos->x, renderInfo.mousePos->y);
+		renderBombWithAppliedOffset(renderInfo.mousePos->x - PIECE_WIDTH / 2, renderInfo.mousePos->y - PIECE_HEIGHT / 2);
 }
 
 chess::TrapChess::TrapChess(PieceColor playerColor)
@@ -211,7 +210,7 @@ void chess::TrapChess::setGameState(const std::string& fenString)
 	m_blackPlayerBomb = {};
 	m_whitePlayerBomb = {};
 
-	auto setBombFromString = [this](auto& bombsArr, const std::string& bombStr) 
+	auto setBombFromString = [this](auto& bombsArr, const std::string& bombStr)
 	{
 		auto pos = toPositionFromChessString(bombStr);
 		if (!pos)
@@ -223,29 +222,29 @@ void chess::TrapChess::setGameState(const std::string& fenString)
 	auto splitted = stringSplit(fenString, " ");
 	Game::setGameState(fenString);
 
-	for (size_t i = 4; i < splitted.size(); i++) 
+	for (size_t i = 4; i < splitted.size(); i++)
 	{
 		if (i < 4 + MaxAllowedBombsPerPlayer)
 			setBombFromString(m_whitePlayerBomb, splitted[i]);
-		else if(i < 4 + 2 * MaxAllowedBombsPerPlayer)
+		else if (i < 4 + 2 * MaxAllowedBombsPerPlayer)
 			setBombFromString(m_blackPlayerBomb, splitted[i]);
 	}
 }
 
 std::string chess::TrapChess::getGameState() const
 {
-	auto getBombString = [this](const auto& bombsArr) 
+	auto getBombString = [this](const auto& bombsArr)
 	{
 		std::string result;
 		int count = 0;
 		auto bombs = getBombPositions(bombsArr);
-		for (const auto& bomb : bombs) 
+		for (const auto& bomb : bombs)
 		{
 			result += " " + toChessPositionString(bomb);
 			count++;
 		}
 
-		while (count < 3) 
+		while (count < 3)
 		{
 			result += " -";
 			count++;

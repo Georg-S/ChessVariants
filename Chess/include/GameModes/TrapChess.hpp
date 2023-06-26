@@ -19,7 +19,7 @@ namespace chess
 		void renderTrapChess(const TrapChessRenderingInformation& renderInfo);
 		void renderBombsExceptSelected(const std::vector<Position>& bombPositions, std::optional<Position> selected = {});
 		void renderBomb(const Position& pos);
-		void renderBomb(int windowX, int windowY);
+		void renderBombWithAppliedOffset(int windowX, int windowY);
 		void renderPiecesWithSelectedOnMousePositionWithBombs(const TrapChessRenderingInformation& renderInfo);
 	};
 
