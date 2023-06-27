@@ -15,31 +15,14 @@ char King::getFenCharacter() const
 	return getFenPieceCharacter('k');
 }
 
-static Position getCastlingTowerPosition(PieceColor color, int xDirection) 
-{
-	Position pos = {};
-
-	if (color == PieceColor::WHITE)
-		pos.y = 7;
-	else
-		pos.y = 0;
-
-	if (xDirection > 0)
-		pos.x = 7;
-	else
-		pos.x = 0;
-
-	return pos;
-}
-
 static void resetCastlingPossibilityForColor(Board* board, PieceColor color)
 {
 	Position towerPos1 = { 7, 7 };
-	Position towerPos2 = {0, 7};
-	if (color == PieceColor::BLACK) 
+	Position towerPos2 = { 0, 7 };
+	if (color == PieceColor::BLACK)
 	{
 		towerPos1 = { 0, 0 };
-		towerPos2 = { 7, 0};
+		towerPos2 = { 7, 0 };
 	}
 
 	board->resetCastlingPossibility(towerPos1);
@@ -58,21 +41,21 @@ bool King::movePossible(const Board& board, const Move& move) const
 		return true;
 
 	if ((absDiff.x != 2) || (absDiff.y != 0))
-		return false; 
+		return false;
 
-	const auto castlingTowerPos = getCastlingTowerPosition(m_pieceColor, direction.x);
-	if (!board.castlingPossible(castlingTowerPos))
+	const auto castlingTowerMove = getCastlingTowerMove(move);
+	if (!board.castlingPossible(castlingTowerMove.from))
 		return false;
 
 	if (board.isOccupied(move.from + direction) || board.isOccupied(move.from + 2 * direction))
 		return false;
-	
+
 	// We don't check for check in the resulting position, this is done in the GameLogic
 	for (Position toCheck = move.from; toCheck != move.to; toCheck += direction)
 	{
 		Board copyBoard = board.getDeepCopy();
-		const Move moveKing = {move.from, toCheck};
-		
+		const Move moveKing = { move.from, toCheck };
+
 		copyBoard.movePiece(moveKing);
 		if (isCheck(copyBoard, toCheck))
 			return false;
@@ -93,18 +76,12 @@ void King::makeMove(Board* inOutBoard, const Move& move) const
 
 	auto diff = move.to - move.from;
 	auto absDiff = abs(diff);
-
-	if (absDiff.x < 2) 
-	{
-		inOutBoard->movePiece(move);
-		return;
-	}
-
-	Position direction = { -1, 0 };
-	if (diff.x > 0)
-		direction.x = 1;
-	auto towerPos = getCastlingTowerPosition(m_pieceColor, direction.x);
-	
 	inOutBoard->movePiece(move);
-	inOutBoard->movePiece({ towerPos, move.to - direction });
+
+	if (absDiff.x < 2)
+		return;
+	
+	// Perform tower move for castling
+	const auto towerMove = getCastlingTowerMove(move); 
+	inOutBoard->movePiece(towerMove);
 }

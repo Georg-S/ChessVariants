@@ -147,31 +147,45 @@ bool chess::TrapChess::isMovePossible(const Move& move) const
 	return ::isMovePossible(m_board, move);
 }
 
+static void moveBomb(std::array<std::array<bool, BOARD_HEIGHT>, BOARD_WIDTH>& bombs, const Move& move) 
+{
+	bombs[move.to.x][move.to.y] = bombs[move.from.x][move.from.y];
+	bombs[move.from.x][move.from.y] = false;
+}
+
 void chess::TrapChess::makeMove(const Move& move)
 {
 	auto piece = m_board[move.from];
 	if (!piece || piece->getColor() != m_currentPlayer)
 		return;
 
-	const bool isEnPassant = m_board.enPassantPossible(move.to) && piece->getFenCharacter() == 'p';
+	const bool isEnPassantMove = m_board.enPassantPossible(move.to) && tolower(piece->getFenCharacter()) == 'p';
+	const auto diff = move.to - move.from;
 	Position toCheckTrapPosition = move.to;
-	if (isEnPassant)
+	if (isEnPassantMove)
 	{
-		const auto diff = move.to - move.from;
 		Position moveDirection = { 0, -1 };
 		if (diff.y > 0)
 			moveDirection.y = 1;
 		toCheckTrapPosition = move.to - moveDirection;
 	}
 
-	// TODO bomb moving on castling
+	const auto absDiff = abs(diff);
+	const bool isCastlingMove = absDiff.x == 2 && tolower(piece->getFenCharacter()) == 'k';
+	if (isCastlingMove) 
+	{
+		auto towerMove = getCastlingTowerMove(move);
+		if (m_currentPlayer == PieceColor::WHITE)
+			moveBomb(m_whitePlayerBomb, towerMove);
+		if (m_currentPlayer == PieceColor::BLACK)
+			moveBomb(m_blackPlayerBomb, towerMove);
+	}
 
 	::makeMove(&m_board, move);
 
 	auto handleBombs = [this, &toCheckTrapPosition, &move](auto& currentPlayerBombs, auto& otherPlayerBombs)
 	{
-		currentPlayerBombs[move.to.x][move.to.y] = currentPlayerBombs[move.from.x][move.from.y];
-		currentPlayerBombs[move.from.x][move.from.y] = false;
+		moveBomb(currentPlayerBombs, move);
 
 		if (otherPlayerBombs[toCheckTrapPosition.x][toCheckTrapPosition.y])
 		{

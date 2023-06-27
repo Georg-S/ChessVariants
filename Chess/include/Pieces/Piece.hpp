@@ -1,11 +1,11 @@
 #pragma once
-
 #include <memory>
+
+#include "Utility.hpp"
 
 namespace chess
 {
 	class Board;
-	struct Move;
 
 	enum class PieceColor { WHITE, BLACK, NONE };
 

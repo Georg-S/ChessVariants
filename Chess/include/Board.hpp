@@ -10,20 +10,10 @@
 
 namespace chess
 {
-	using Position = Vec2D<int>;
-	std::string toChessPositionString(const Position& pos);
-	std::optional<Position> toPositionFromChessString(const std::string& str);
 
-	struct Move 
-	{
-		Position from = {};
-		Position to = {};
-	};
 
 	static constexpr int BOARD_WIDTH = 8;
 	static constexpr int BOARD_HEIGHT = 8;
-	static const std::string defaultStartPos = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
 
 	class Board
 	{

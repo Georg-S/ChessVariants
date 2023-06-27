@@ -19,4 +19,6 @@ namespace chess
 	std::optional<PieceColor> getPromotionSelectionColor(const Board& board);
 	std::optional<Position> getKingPosition(const Board& board, PieceColor color);
 	void executePromotion(Board* inOutBoard, char selectedFenCharPiece);
+	/// Caller must make sure that the move is actually a castling move before calling this function
+	Move getCastlingTowerMove(const Move& kingMove);
 }

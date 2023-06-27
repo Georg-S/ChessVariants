@@ -270,3 +270,22 @@ void chess::executePromotion(Board* inOutBoard, char selectedFenCharPiece)
     assert(pos);
     inOutBoard->replacePiece(*pos, selectedFenCharPiece);
 }
+
+Move chess::getCastlingTowerMove(const Move& kingMove) 
+{
+    auto diff = kingMove.to - kingMove.from;
+
+    Position direction = { -1, 0 };
+    if (diff.x > 0)
+        direction.x = 1;
+
+    Position towerPos = {};
+    towerPos.y = kingMove.from.y;
+
+    if (direction.x > 0)
+        towerPos.x = 7;
+    else
+        towerPos.x = 0;
+
+    return Move{ towerPos, kingMove.to - direction };
+}
