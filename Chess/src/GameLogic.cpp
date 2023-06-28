@@ -5,9 +5,14 @@
 
 using namespace chess;
 
-static bool isKing(const Piece* piece) 
+bool chess::isKing(const Piece* piece)
 {
     return tolower(piece->getFenCharacter()) == 'k';
+}
+
+bool chess::isPawn(const Piece* piece)
+{
+    return tolower(piece->getFenCharacter()) == 'p';
 }
 
 bool chess::isIndexInsideBoardBoundaries(const Position& position)
@@ -111,7 +116,7 @@ bool chess::directMovePossible(const Board& board, const Move& move)
     return true;
 }
 
-static bool isMoveInBoardRange(const Move& move) 
+bool chess::isMoveInBoardRange(const Move& move) 
 {
     if (move.from.x < 0 || move.from.x >= BOARD_WIDTH)
         return false;
@@ -288,4 +293,42 @@ Move chess::getCastlingTowerMove(const Move& kingMove)
         towerPos.x = 0;
 
     return Move{ towerPos, kingMove.to - direction };
+}
+
+bool chess::isCastlingPossible(const Board& board, const Move& move, bool checkForCheck)
+{
+    if (!isKing(board[move.from]))
+        return false;
+
+    const auto diff = move.to - move.from;
+    const auto absDiff = abs(diff);
+    Position direction = { -1, 0 };
+    if (diff.x > 0)
+        direction.x = 1;
+
+    if ((absDiff.x != 2) || (absDiff.y != 0))
+        return false;
+
+    const auto castlingTowerMove = getCastlingTowerMove(move);
+    if (!board.castlingPossible(castlingTowerMove.from))
+        return false;
+
+    if (board.isOccupied(move.from + direction) || board.isOccupied(move.from + 2 * direction))
+        return false;
+
+    if (!checkForCheck)
+        return true;
+
+    // We don't check for check in the resulting position, this is done in the GameLogic
+    for (Position toCheck = move.from; toCheck != move.to; toCheck += direction)
+    {
+        Board copyBoard = board.getDeepCopy();
+        const Move moveKing = { move.from, toCheck };
+
+        copyBoard.movePiece(moveKing);
+        if (isCheck(copyBoard, toCheck))
+            return false;
+    }
+
+    return true;
 }

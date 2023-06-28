@@ -1,8 +1,10 @@
 #include "GameModes/FogOfWarChess.hpp"
 
-using namespace chess;
+#include <cassert>
 
 #include "GameLogic.hpp"
+
+using namespace chess;
 
 void chess::FogOfWarRenderer::render(const FogOfWarRenderInformation& renderInfo)
 {
@@ -110,13 +112,31 @@ bool chess::FogOfWarChess::update()
 
 bool chess::FogOfWarChess::isMovePossible(const Move& move) const
 {
-	if (!m_board[move.from])
+	if (!isMoveInBoardRange(move))
+	{
+		assert(!"Move out of range");
+		return false;
+	}
+
+	if (move.from == move.to)
 		return false;
 
-	if (m_board[move.from]->getColor() != m_currentPlayer)
+	const auto piece = m_board[move.from];
+	if (!piece)
 		return false;
 
-	return ::isMovePossible(m_board, move);
+	if (piece->getColor() != m_currentPlayer)
+		return false;
+
+	if (piece->movePossible(m_board, move))
+		return true;
+
+	// Special handling for castling because king->movePossible checks for check 
+	// and we don't want to examine for check in this game mode
+	if (isCastlingPossible(m_board, move, false))
+		return true;
+
+	return false;
 }
 
 void chess::FogOfWarChess::makeMove(const Move& move)
@@ -129,7 +149,10 @@ void chess::FogOfWarChess::makeMove(const Move& move)
 
 bool chess::FogOfWarChess::isGameOver() const
 {
-	return ::isGameOver(m_board, m_currentPlayer);
+	auto blackKingPos = getKingPosition(m_board, PieceColor::BLACK);
+	auto whiteKingPos = getKingPosition(m_board, PieceColor::WHITE);
+
+	return !blackKingPos || !whiteKingPos;
 }
 
 void chess::FogOfWarChess::setPreviousMove(const Move& move)
@@ -144,10 +167,8 @@ void chess::FogOfWarChess::updateRenderInfo()
 	m_renderInfo.mousePos = { m_mouse.getMousePositionX(), m_mouse.getMousePositionY() };
 	m_renderInfo.promotionSelectionColor = getPromotionSelectionColor(m_board);
 	m_renderInfo.toRenderColor = m_renderColor;
-	if (isCheckMate(m_board, PieceColor::BLACK))
-		m_renderInfo.playerWon = PieceColor::WHITE;
-	else if (isCheckMate(m_board, PieceColor::WHITE))
+	if (!getKingPosition(m_board, PieceColor::WHITE))
 		m_renderInfo.playerWon = PieceColor::BLACK;
-	else if (isStaleMate(m_board, m_currentPlayer))
-		m_renderInfo.playerWon = PieceColor::NONE;
+	if (!getKingPosition(m_board, PieceColor::BLACK))
+		m_renderInfo.playerWon = PieceColor::WHITE;
 }

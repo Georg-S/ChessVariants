@@ -31,37 +31,12 @@ static void resetCastlingPossibilityForColor(Board* board, PieceColor color)
 
 bool King::movePossible(const Board& board, const Move& move) const
 {
-	const auto diff = move.to - move.from;
-	const auto absDiff = abs(diff);
-	Position direction = { -1, 0 };
-	if (diff.x > 0)
-		direction.x = 1;
+	const auto absDiff = abs(move.to - move.from);
 
 	if (absDiff.x <= 1 && absDiff.y <= 1)
 		return true;
 
-	if ((absDiff.x != 2) || (absDiff.y != 0))
-		return false;
-
-	const auto castlingTowerMove = getCastlingTowerMove(move);
-	if (!board.castlingPossible(castlingTowerMove.from))
-		return false;
-
-	if (board.isOccupied(move.from + direction) || board.isOccupied(move.from + 2 * direction))
-		return false;
-
-	// We don't check for check in the resulting position, this is done in the GameLogic
-	for (Position toCheck = move.from; toCheck != move.to; toCheck += direction)
-	{
-		Board copyBoard = board.getDeepCopy();
-		const Move moveKing = { move.from, toCheck };
-
-		copyBoard.movePiece(moveKing);
-		if (isCheck(copyBoard, toCheck))
-			return false;
-	}
-
-	return true;
+	return isCastlingPossible(board, move, true);
 }
 
 std::unique_ptr<Piece> King::getDeepCopy() const
