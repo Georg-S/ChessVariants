@@ -234,8 +234,7 @@ static std::optional<Position> getPromotionPawnPosition(const Board& board)
             if (piece->getColor() == PieceColor::BLACK && (pos.y == 0))
                 continue;
             
-            char pieceType = tolower(piece->getFenCharacter());
-            if (pieceType == 'p') 
+            if (isPawn(piece)) 
                 return pos;
         }
     }

@@ -159,7 +159,7 @@ void chess::TrapChess::makeMove(const Move& move)
 	if (!piece || piece->getColor() != m_currentPlayer)
 		return;
 
-	const bool isEnPassantMove = m_board.enPassantPossible(move.to) && tolower(piece->getFenCharacter()) == 'p';
+	const bool isEnPassantMove = isPawn(piece) && m_board.enPassantPossible(move.to);
 	const auto diff = move.to - move.from;
 	Position toCheckTrapPosition = move.to;
 	if (isEnPassantMove)
@@ -171,7 +171,7 @@ void chess::TrapChess::makeMove(const Move& move)
 	}
 
 	const auto absDiff = abs(diff);
-	const bool isCastlingMove = absDiff.x == 2 && tolower(piece->getFenCharacter()) == 'k';
+	const bool isCastlingMove = isKing(piece) && absDiff.x == 2;
 	if (isCastlingMove) 
 	{
 		auto towerMove = getCastlingTowerMove(move);
