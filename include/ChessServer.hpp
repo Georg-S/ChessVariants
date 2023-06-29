@@ -35,4 +35,5 @@ private:
 	std::map<uint32_t, chess::PieceColor> m_connectionIdToColor;
 	std::ofstream m_gameLog;
 	bool m_gameCanBeStarted = true;
+	bool m_runServer = true;
 };

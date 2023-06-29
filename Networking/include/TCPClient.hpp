@@ -21,9 +21,8 @@ namespace net
 	{
 	public:
 		TCPClient(std::string ipAddress, uint16_t port);
-		void connect();
 		virtual ~TCPClient();
-		void run();
+		void run(); // Runs the tcp client in a new thread
 		void stop();
 		size_t getMessageCount() const;
 		std::shared_ptr<Message> getFirstMessage();
@@ -32,10 +31,13 @@ namespace net
 		void sendMessage(std::shared_ptr<Message> message);
 
 	private:
+		void connect();
 		void connectTo(const tcp::resolver::results_type& endpoints);
+		void disconnect();
 		void readHeader();
 		void readBody(std::shared_ptr<Message> unfinishedMessage);
 		void sendMessage();
+		void pushSystemMessage(net::SystemMessages messageType);
 
 		std::string m_ip;
 		std::thread m_thread;

@@ -22,5 +22,6 @@ private:
 	chess::PieceColor m_playerColor = chess::PieceColor::NONE;
 	chess::GAME_MODES m_gameMode = chess::GAME_MODES::NORMAL;
 	bool m_runGame = false;
+	bool m_runClient = true;
 	std::unique_ptr<chess::Game> m_game;
 };

@@ -258,7 +258,6 @@ void Board::setCastlingFromFenString(const std::string& castlingFen)
 {
 	for (char c : castlingFen)
 	{
-		// TODO maybe needs to be split up into black and white castling possible? But most likely not
 		if (c == 'k')
 			m_castlingPossible[7][0] = true;
 		if (c == 'q')

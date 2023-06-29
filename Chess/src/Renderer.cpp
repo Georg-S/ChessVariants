@@ -84,7 +84,7 @@ void chess::Renderer::renderNormalGameState(const RenderInformation& renderInfo)
 
 void chess::Renderer::renderChessBoard()
 {
-	m_sdlHandler->createAndPushBackRenderElement(basePath + "Board.png", 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+	m_sdlHandler->createAndPushBackRenderElement(imagesPath + "Board.png", 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 }
 
 void chess::Renderer::renderPieces(const chess::Board& board)
@@ -110,10 +110,10 @@ void chess::Renderer::renderPiece(char fenChar, const Position& pos)
 
 void chess::Renderer::renderPreviousMove(const chess::Move& previousMove)
 {
-	m_sdlHandler->createAndPushBackRenderElement(basePath + "PreviousMove.png", PIECE_WIDTH * previousMove.from.x,
+	m_sdlHandler->createAndPushBackRenderElement(imagesPath + "PreviousMove.png", PIECE_WIDTH * previousMove.from.x,
 		PIECE_HEIGHT * previousMove.from.y, PIECE_WIDTH, PIECE_HEIGHT);
 
-	m_sdlHandler->createAndPushBackRenderElement(basePath + "PreviousMove.png", PIECE_WIDTH * previousMove.to.x,
+	m_sdlHandler->createAndPushBackRenderElement(imagesPath + "PreviousMove.png", PIECE_WIDTH * previousMove.to.x,
 		PIECE_HEIGHT * previousMove.to.y, PIECE_WIDTH, PIECE_HEIGHT);
 }
 
@@ -149,14 +149,14 @@ void chess::Renderer::renderAllPossibleMovesForSelectedPiece(const chess::Board&
 	auto possibleMoves = chess::getAllPossibleMoves(board, selectedPos);
 	for (const auto& move : possibleMoves) 
 	{
-		m_sdlHandler->createAndPushBackRenderElement(basePath + "PossibleMove.png", PIECE_WIDTH * move.to.x, 
+		m_sdlHandler->createAndPushBackRenderElement(imagesPath + "PossibleMove.png", PIECE_WIDTH * move.to.x, 
 			PIECE_HEIGHT * move.to.y, PIECE_WIDTH, PIECE_HEIGHT);
 	}
 }
 
 void chess::Renderer::render_promotion_selection(chess::PieceColor color)
 {
-	m_sdlHandler->createAndPushBackRenderElement(basePath + "background.png", 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+	m_sdlHandler->createAndPushBackRenderElement(imagesPath + "background.png", 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	std::string queenStr = getPieceFileString('q', color);
 	std::string rookStr = getPieceFileString('r', color);
@@ -171,7 +171,7 @@ void chess::Renderer::render_promotion_selection(chess::PieceColor color)
 
 void chess::Renderer::renderGameOver(chess::PieceColor playerWon)
 {
-	std::string toRender = basePath + "GameOver/";
+	std::string toRender = imagesPath + "GameOver/";
 	if (playerWon == PieceColor::BLACK)
 		toRender += "BlackWins.png";
 	else if (playerWon == PieceColor::WHITE)
@@ -196,7 +196,7 @@ std::string chess::Renderer::getPieceFileString(char fenChar) const
 {
 	chess::PieceColor color = islower(fenChar) ? chess::PieceColor::BLACK : chess::PieceColor::WHITE;
 
-	return basePath + getPieceTypeString(tolower(fenChar)) + "_" + getColorString(color) + ".png";
+	return imagesPath + getPieceTypeString(tolower(fenChar)) + "_" + getColorString(color) + ".png";
 }
 
 std::string chess::Renderer::getPieceTypeString(char fenChar) const

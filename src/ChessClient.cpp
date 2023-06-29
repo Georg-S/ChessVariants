@@ -19,10 +19,9 @@ ChessClient::ChessClient()
 
 void ChessClient::run()
 {
-	m_client->connect();
 	m_client->run();
 
-	while (true) // TODO run until disconnected
+	while (m_runClient)
 	{
 		auto message = m_client->getAndRemoveFirstMessage();
 		if (message)
@@ -34,6 +33,18 @@ void ChessClient::run()
 
 void ChessClient::handleMessage(std::shared_ptr<net::Message> message)
 {
+	switch (net::SystemMessages(message->header.messageType)) 
+	{
+	case net::CONNECTION_CLOSED:
+		//m_runClient = false;
+		return;
+	case net::NEW_CONNECTION:
+		return; // Do nothing
+	default:
+		break; // Not a system message, continue with custom messages
+	}
+
+
 	switch (MESSAGETYPE(message->header.messageType))
 	{
 	case MESSAGETYPE::INIT_PLAYER:
@@ -130,7 +141,7 @@ void ChessClient::handleGame()
 	m_client->sendMessage(makeMoveMessage);
 }
 
-std::unique_ptr<chess::Game> ChessClient::createGame(chess::GAME_MODES gameMode) // TODO maybe move into its own file so Server and Client can share this code
+std::unique_ptr<chess::Game> ChessClient::createGame(chess::GAME_MODES gameMode)
 {
 	switch (gameMode)
 	{

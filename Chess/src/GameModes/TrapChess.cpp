@@ -66,7 +66,7 @@ void chess::TrapChessRenderer::renderBombWithAppliedOffset(int windowX, int wind
 	const int offsetX = -PIECE_WIDTH / 8;
 	const int offsetY = -PIECE_HEIGHT / 8;
 
-	const std::string fileString = basePath + "bomb.png";
+	const std::string fileString = imagesPath + "bomb.png";
 	m_sdlHandler->createAndPushBackRenderElement(fileString, windowX + offsetX, windowY + offsetY, BOMB_WIDTH, BOMB_HEIGHT);
 }
 

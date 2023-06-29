@@ -14,8 +14,11 @@ namespace net
 
 	enum SystemMessages : uint32_t
 	{
-		NEW_CONNECTION, // Has no body data and writes the id of the new connected client to the "fromID" and "toID"
-		CONNECTION_CLOSED, // Has no body data and writes the id of the lost connection client id to the "fromID" and "toID"
+		// Has no body data and (only for the server) writes the id of the new connected client to the "fromID" and "toID"
+		NEW_CONNECTION, 
+		// Has no body data and (only for the server) writes the id of the lost connection client id to the "fromID" and "toID"
+		CONNECTION_CLOSED,
+		// End value of the system messages, to have a starting point for the custom messages of the application
 		SYSTEM_MESSAGES_END
 	};
 
@@ -121,15 +124,15 @@ namespace net
 		}
 
 	private:
-		void copyHeaderIntoDataBuffer() 
-		{
-			memcpy_s(dataBuffer.data(), headerSize(), static_cast<void*>(&header), headerSize());
-		}
-
 		void allocateAndInitializeBuffer()
 		{
 			dataBuffer = std::vector<std::byte>(header.bodySize + headerSize(), std::byte(0));
 			copyHeaderIntoDataBuffer();
+		}
+
+		void copyHeaderIntoDataBuffer() 
+		{
+			memcpy_s(dataBuffer.data(), headerSize(), static_cast<void*>(&header), headerSize());
 		}
 
 		void copyDataIntoBuffer(const void* data, uint32_t dataSize)

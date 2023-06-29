@@ -115,8 +115,7 @@ void net::TCPServer::sendMessage(std::shared_ptr<Message> message, std::shared_p
 			if (ec)
 			{
 				std::cout << "Error occured while writing message ... closing session: " << std::endl << ec.what() << std::endl;
-				session->disconnect();
-				cleanupConnection();
+				disconnectSession(session);
 			}
 			else
 			{
@@ -178,8 +177,7 @@ void net::TCPServer::readHeader(std::shared_ptr<Session> session)
 			if (ec)
 			{
 				std::cout << "Error reading message header ... closing session: " << std::endl << ec.what() << std::endl;
-				session->disconnect();
-				cleanupConnection();
+				disconnectSession(session);
 				return;
 			}
 			currentMessage->resize();
@@ -198,8 +196,7 @@ void net::TCPServer::readBody(std::shared_ptr<Session> session, std::shared_ptr<
 			if (ec)
 			{
 				std::cout << "Error reading message body ... closing session: " << std::endl << ec.what() << std::endl;
-				session->disconnect();
-				cleanupConnection();
+				disconnectSession(session);
 				return;
 			}
 			m_inMessages.pushBack(unfinishedMessage);
@@ -208,14 +205,15 @@ void net::TCPServer::readBody(std::shared_ptr<Session> session, std::shared_ptr<
 		});
 }
 
-void net::TCPServer::cleanupConnection()
+void net::TCPServer::disconnectSession(std::shared_ptr<Session> session)
 {
-	boost::asio::post(m_context, [this]()
+	boost::asio::post(m_context, [this, session]()
 		{
 			std::scoped_lock lock(m_sessionMutex);
+			session->disconnect();
 			for (auto it = m_sessions.begin(); it != m_sessions.end();)
 			{
-				if (!it->second->isConnected()) 
+				if (!it->second->isConnected())
 				{
 					it = m_sessions.erase(it);
 
@@ -226,7 +224,7 @@ void net::TCPServer::cleanupConnection()
 					message->fromID = m_sessionId;
 					m_inMessages.pushBack(message);
 				}
-				else 
+				else
 				{
 					++it;
 				}

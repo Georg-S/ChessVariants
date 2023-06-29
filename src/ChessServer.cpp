@@ -57,7 +57,7 @@ void ChessServer::run()
 {
 	m_server->start();
 
-	while (true)
+	while (m_runServer)
 	{
 		auto inMessage = m_server->getAndRemoveFirstMessage();
 		if (inMessage)
@@ -94,7 +94,9 @@ void ChessServer::handleMessage(std::shared_ptr<net::ServerMessage> message)
 	}
 	case net::CONNECTION_CLOSED:
 	{
-		// TODO handle connection loss
+		//std::cout << "Connection to one of the clients lost, closing server" << std::endl;
+		//m_server->stop();
+		//m_runServer = false;
 		return;
 	}
 	default:

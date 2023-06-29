@@ -5,9 +5,9 @@
 #include "Board.hpp"
 #include "SDL/SDLHandler.hpp"
 
-namespace chess {
-
-	static const std::string basePath = "Images/"; // TODO rename
+namespace chess 
+{
+	static const std::string imagesPath = "Images/";
 	constexpr int WINDOW_WIDTH = 800;
 	constexpr int WINDOW_HEIGHT = 800;
 
