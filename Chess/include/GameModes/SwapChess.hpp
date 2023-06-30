@@ -6,6 +6,7 @@ namespace chess
 {
 	class SwapChess : public chess::Chess
 	{
+		virtual void enableRendering() override;
 		virtual bool isMovePossible(const Move& move) const override;
 		virtual void makeMove(const Move& move) override;
 	};

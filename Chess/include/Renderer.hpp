@@ -26,7 +26,7 @@ namespace chess
 	public:
 		Renderer();
 		virtual ~Renderer() = default;
-		virtual void start();
+		virtual void start(const std::string& windowName);
 		virtual void renderBoard(const std::string& fenBoardString);
 		virtual void renderBoard(const chess::Board& board);
 		virtual void render(const RenderInformation& renderInfo);

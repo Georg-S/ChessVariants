@@ -9,10 +9,10 @@ chess::Renderer::Renderer()
 	m_sdlHandler = std::make_unique<SDLHandler>(WINDOW_WIDTH, WINDOW_HEIGHT, true);
 }
 
-void chess::Renderer::start()
+void chess::Renderer::start(const std::string& windowName)
 {
-	if (!m_running) 
-		m_running = m_sdlHandler->start("Chess");
+	if (!m_running)
+		m_running = m_sdlHandler->start(windowName);
 }
 
 void chess::Renderer::renderBoard(const std::string& fenBoardString)

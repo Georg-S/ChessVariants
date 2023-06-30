@@ -89,7 +89,7 @@ chess::FogOfWarChess::FogOfWarChess(PieceColor playerColor)
 
 void chess::FogOfWarChess::enableRendering()
 {
-	m_renderer.start();
+	m_renderer.start("Fog of War Chess");
 }
 
 bool chess::FogOfWarChess::update()

@@ -25,6 +25,11 @@ static bool isSwapMovePossible(const Board& board, PieceColor currentPlayer, con
 	return !isCheck(copyBoard, currentPlayer);
 }
 
+void chess::SwapChess::enableRendering()
+{
+	m_renderer.start("Swap Chess");
+}
+
 bool chess::SwapChess::isMovePossible(const Move& move) const
 {
 	if (!m_board[move.from])

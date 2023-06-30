@@ -11,7 +11,7 @@ chess::Chess::Chess(const std::string& fenString)
 
 void chess::Chess::enableRendering()
 {
-	m_renderer.start();
+	m_renderer.start("Chess");
 }
 
 bool chess::Chess::update()

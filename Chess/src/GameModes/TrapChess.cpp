@@ -115,7 +115,7 @@ chess::TrapChess::TrapChess(PieceColor playerColor)
 
 void chess::TrapChess::enableRendering()
 {
-	m_renderer.start();
+	m_renderer.start("Trap Chess");
 }
 
 bool chess::TrapChess::update()
