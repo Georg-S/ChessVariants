@@ -141,7 +141,19 @@ void ChessClient::handleGame()
 	m_client->sendMessage(makeMoveMessage);
 }
 
-std::unique_ptr<chess::Game> ChessClient::createGame(chess::GAME_MODES gameMode)
+void ChessClient::handleGamePreparation()
+{
+	if (m_gameMode == chess::GAME_MODES::TRAP) 
+	{
+		auto pos = m_game->getSelectedBoardPosition();
+		if (!pos)
+			return;
+		auto selectedBombPosition = std::make_shared<net::Message>(net::SERVER, MESSAGETYPE::POSITION_SELECTED, *pos);
+		m_client->sendMessage(selectedBombPosition);
+	}
+}
+
+std::unique_ptr<chess::Game> ChessClient::createGame(chess::GAME_MODES gameMode) const
 {
 	switch (gameMode)
 	{
@@ -154,16 +166,4 @@ std::unique_ptr<chess::Game> ChessClient::createGame(chess::GAME_MODES gameMode)
 	}
 	assert(!"Unrecognized game mode");
 	return nullptr;
-}
-
-void ChessClient::handleGamePreparation()
-{
-	if (m_gameMode == chess::GAME_MODES::TRAP) 
-	{
-		auto pos = m_game->getSelectedBoardPosition();
-		if (!pos)
-			return;
-		auto selectedBombPosition = std::make_shared<net::Message>(net::SERVER, MESSAGETYPE::POSITION_SELECTED, *pos);
-		m_client->sendMessage(selectedBombPosition);
-	}
 }

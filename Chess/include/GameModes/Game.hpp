@@ -44,8 +44,8 @@ namespace chess
 		char getPieceFromPromotion(const Position& pos) const;
 
 		bool m_isGameReady = true;
+		PieceColor m_currentPlayer = PieceColor::NONE;
 		std::optional<Position> m_selectedPiece;
-		PieceColor m_currentPlayer;
 		Board m_board;
 		Mouse m_mouse;
 	};

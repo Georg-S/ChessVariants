@@ -126,7 +126,8 @@ namespace net
 	private:
 		void allocateAndInitializeBuffer()
 		{
-			dataBuffer = std::vector<std::byte>(header.bodySize + headerSize(), std::byte(0));
+			const auto bufferSize = size_t(header.bodySize) + headerSize();
+			dataBuffer = std::vector<std::byte>(bufferSize, std::byte(0));
 			copyHeaderIntoDataBuffer();
 		}
 

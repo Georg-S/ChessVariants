@@ -36,6 +36,7 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT C
 
 if (MSVC)
     target_compile_options(Chess PRIVATE "/MP") # Enable multi threaded compilation
+	add_definitions(-D_WIN32_WINNT=0x0601)
 	#   copy dlls next to exe for windows (visual studio)
     add_custom_command(TARGET ChessServer
                         POST_BUILD

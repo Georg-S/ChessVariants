@@ -110,7 +110,7 @@ chess::TrapChess::TrapChess(PieceColor playerColor)
 	: m_playerPerspective(playerColor)
 {
 	m_isGameReady = false; // Bombs must be placed first before the game can be played
-	setGameState(defaultStartPos);
+	TrapChess::setGameState(defaultStartPos);
 }
 
 void chess::TrapChess::enableRendering()
@@ -224,7 +224,7 @@ void chess::TrapChess::setGameState(const std::string& fenString)
 	m_blackPlayerBomb = {};
 	m_whitePlayerBomb = {};
 
-	auto setBombFromString = [this](auto& bombsArr, const std::string& bombStr)
+	auto setBombFromString = [](auto& bombsArr, const std::string& bombStr)
 	{
 		auto pos = toPositionFromChessString(bombStr);
 		if (!pos)
@@ -247,7 +247,7 @@ void chess::TrapChess::setGameState(const std::string& fenString)
 
 std::string chess::TrapChess::getGameState() const
 {
-	auto getBombString = [this](const auto& bombsArr)
+	auto getBombString = [](const auto& bombsArr)
 	{
 		std::string result;
 		int count = 0;
