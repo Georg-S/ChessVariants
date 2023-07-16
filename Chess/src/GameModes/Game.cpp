@@ -10,12 +10,23 @@ std::string chess::gameModeToString(GAME_MODES gameMode)
 {
 	switch (gameMode)
 	{
-	case chess::GAME_MODES::NORMAL: return "NormalChess";
-	case chess::GAME_MODES::SWAP: return "SwapChess";
-	case chess::GAME_MODES::TRAP: return "TrapChess";
-	case chess::GAME_MODES::FOGOFWAR: return "FogOfWarChess";
+	case GAME_MODES::NORMAL: return "NormalChess";
+	case GAME_MODES::SWAP: return "SwapChess";
+	case GAME_MODES::TRAP: return "TrapChess";
+	case GAME_MODES::FOGOFWAR: return "FogOfWarChess";
 	default: assert(!"Unrecognized mode"); return "InvalidMode";
 	}
+}
+
+GAME_MODES chess::gameModeFromString(const std::string& gameModeStr)
+{
+	if (gameModeStr == "NormalChess") return GAME_MODES::NORMAL;
+	if (gameModeStr == "SwapChess") return GAME_MODES::SWAP;
+	if (gameModeStr == "TrapChess") return GAME_MODES::TRAP;
+	if (gameModeStr == "FogOfWarChess") return GAME_MODES::FOGOFWAR;
+
+	assert(!"Unrecognized game mode string");
+	return GAME_MODES(-1);
 }
 
 void chess::Game::setGameReady(bool ready)

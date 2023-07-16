@@ -47,7 +47,7 @@ Board getFogOfWarBoard(const Board& board, PieceColor playerColor)
 		for (pos.y = 0; pos.y < BOARD_HEIGHT; pos.y++)
 		{
 			auto piece = board[pos];
-			if (!piece || (piece->getColor() != playerColor))
+			if (!piece || ((piece->getColor() != playerColor) && (playerColor != PieceColor::NONE)))
 				continue;
 			setIsVisibleForPosition(pos);
 		}
@@ -167,6 +167,7 @@ void chess::FogOfWarChess::updateRenderInfo()
 	m_renderInfo.mousePos = { m_mouse.getMousePositionX(), m_mouse.getMousePositionY() };
 	m_renderInfo.promotionSelectionColor = getPromotionSelectionColor(m_board);
 	m_renderInfo.toRenderColor = m_renderColor;
+	m_renderInfo.playerWon = {};
 	if (!getKingPosition(m_board, PieceColor::WHITE))
 		m_renderInfo.playerWon = PieceColor::BLACK;
 	if (!getKingPosition(m_board, PieceColor::BLACK))

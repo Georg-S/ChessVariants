@@ -23,6 +23,7 @@ set(CHESS_CLIENT_SOURCES
 
 add_subdirectory(Networking)
 add_subdirectory(Chess)
+add_subdirectory(GameReplay)
 #Server
 add_executable(ChessServer ${CHESS_SERVER_HEADERS} ${CHESS_SERVER_SOURCES})
 target_include_directories(ChessServer PUBLIC "include")

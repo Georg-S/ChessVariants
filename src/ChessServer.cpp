@@ -142,6 +142,7 @@ void ChessServer::handlePromotion(uint32_t clientId, const chess::Position& posi
 
 	m_game->pawnPromotion(position);
 	broadCastCurrentGameState(MESSAGETYPE::GAMESTATE_UPDATE);
+	logCurrentGameState();
 }
 
 void ChessServer::handlePositionSelected(uint32_t clientId, const chess::Position& position)

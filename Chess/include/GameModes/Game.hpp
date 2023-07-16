@@ -13,6 +13,7 @@ namespace chess
 	};
 
 	std::string gameModeToString(GAME_MODES gameMode);
+	GAME_MODES gameModeFromString(const std::string& gameModeStr);
 
 	class Game
 	{

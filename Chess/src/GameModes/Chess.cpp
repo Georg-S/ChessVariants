@@ -68,6 +68,7 @@ void chess::Chess::updateRenderInfo()
 	m_renderInfo.positionToRenderOnMousePosition = m_selectedPiece;
 	m_renderInfo.mousePos = { m_mouse.getMousePositionX(), m_mouse.getMousePositionY() };
 	m_renderInfo.promotionSelectionColor = getPromotionSelectionColor(m_board);
+	m_renderInfo.playerWon = {};
 	if (isCheckMate(m_board, PieceColor::BLACK))
 		m_renderInfo.playerWon = PieceColor::WHITE;
 	else if (isCheckMate(m_board, PieceColor::WHITE))

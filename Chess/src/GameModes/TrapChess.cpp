@@ -314,10 +314,20 @@ void chess::TrapChess::updateRenderInfo()
 	m_renderInfo.positionToRenderOnMousePosition = m_selectedPiece;
 	m_renderInfo.mousePos = { m_mouse.getMousePositionX(), m_mouse.getMousePositionY() };
 	m_renderInfo.promotionSelectionColor = getPromotionSelectionColor(m_board);
-	if (m_playerPerspective == PieceColor::WHITE)
+	if (m_playerPerspective == PieceColor::NONE) 
+	{
 		m_renderInfo.bombPositions = getBombPositions(m_whitePlayerBomb);
-	else if (m_playerPerspective == PieceColor::BLACK)
+		auto blackBombs = getBombPositions(m_blackPlayerBomb);
+		m_renderInfo.bombPositions.insert(m_renderInfo.bombPositions.end(), blackBombs.begin(), blackBombs.end());
+	}
+	else if (m_playerPerspective == PieceColor::WHITE) 
+	{
+		m_renderInfo.bombPositions = getBombPositions(m_whitePlayerBomb);
+	}
+	else if (m_playerPerspective == PieceColor::BLACK) 
+	{
 		m_renderInfo.bombPositions = getBombPositions(m_blackPlayerBomb);
+	}
 
 	if (!getKingPosition(m_board, PieceColor::BLACK))
 		m_renderInfo.playerWon = PieceColor::WHITE;
