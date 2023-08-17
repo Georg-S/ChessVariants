@@ -67,6 +67,7 @@ int main()
 	int currentGameStatesIndex = 0;
 	if (gameStates.empty() || (gameMode == chess::GAME_MODES(-1)))
 	{
+		std::cout << "No valid gamestates found" << std::endl;
 		getchar();
 		return 0;
 	}
@@ -82,25 +83,34 @@ int main()
 	Button leftArrow = Button("Left arrow", VK_LEFT);
 	Button rightArrow = Button("Left arrow", VK_RIGHT);
 
-	leftArrow.setOnClickCallback([&gameStates, &games, &currentGameStatesIndex]() 
+	auto moveForward = [&gameStates, &games, &currentGameStatesIndex]() -> void
+	{
+		currentGameStatesIndex = std::min(currentGameStatesIndex + 1, static_cast<int>(gameStates.size() - 1));
+		for (auto& game : games) 
 		{
-			currentGameStatesIndex = std::max(0, currentGameStatesIndex - 1);
-			for (auto& game : games) 
-				game->setGameState(gameStates[currentGameStatesIndex]);
-		});
+			game->setGameState(gameStates[currentGameStatesIndex]);
+			game->update();
+		}
+	};
 
-	rightArrow.setOnClickCallback([&gameStates, &games, &currentGameStatesIndex]()
+	auto moveBackward = [&gameStates, &games, &currentGameStatesIndex]() -> void
+	{
+		currentGameStatesIndex = std::max(0, currentGameStatesIndex - 1);
+		for (auto& game : games) 
 		{
-			currentGameStatesIndex = std::min(currentGameStatesIndex + 1, static_cast<int>(gameStates.size() - 1));
-			for (auto& game : games)
-				game->setGameState(gameStates[currentGameStatesIndex]);
-		});
+			game->setGameState(gameStates[currentGameStatesIndex]);
+			game->update();
+		}
+	};
+
+	leftArrow.setOnClickCallback(moveBackward);
+	rightArrow.setOnClickCallback(moveForward);
 
 	while (true) 
 	{
 		leftArrow.update();
 		rightArrow.update();
-		for (auto& game : games)
+		for (auto& game : games) 
 			game->update();
 	}
 

@@ -36,7 +36,6 @@ namespace net
 		void acceptConnection();
 		void readHeader(std::shared_ptr<Session> session);
 		void readBody(std::shared_ptr<Session> session, std::shared_ptr<ServerMessage> unfinishedMessage);
-		void cleanupConnection();
 		void disconnectSession(std::shared_ptr<Session> session);
 
 		static constexpr uint32_t SessionStartId = 2;
