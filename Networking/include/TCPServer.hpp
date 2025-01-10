@@ -3,8 +3,6 @@
 #include <memory>
 #include <map>
 #include <thread>
-#include <optional>
-#include <iostream>
 #include <boost/asio.hpp>
 #include <boost/asio/ts/buffer.hpp>
 #include <boost/asio/ts/internet.hpp>

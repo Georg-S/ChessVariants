@@ -6,6 +6,17 @@
 
 namespace net
 {
+	static bool memcpy_secure(void* dest, size_t destSize, const void* source, size_t size) 
+	{
+		if (destSize < size) 
+		{
+			assert(false);
+			return false;
+		}
+		memcpy(dest, source, size);
+		return true;
+	}
+
 	enum DestinationID
 	{
 		SERVER = 0,
@@ -133,12 +144,12 @@ namespace net
 
 		void copyHeaderIntoDataBuffer() 
 		{
-			memcpy_s(dataBuffer.data(), headerSize(), static_cast<void*>(&header), headerSize());
+			memcpy_secure(dataBuffer.data(), headerSize(), static_cast<const void*>(&header), headerSize());
 		}
 
 		void copyDataIntoBuffer(const void* data, uint32_t dataSize)
 		{
-			memcpy_s(getBodyStart(), header.bodySize, data, dataSize);
+			memcpy_secure(getBodyStart(), header.bodySize, data, dataSize);
 		}
 	};
 
