@@ -3,6 +3,7 @@
 #include <vector>
 #include <type_traits>
 #include <cstddef>
+#include <cassert>
 
 namespace net
 {
