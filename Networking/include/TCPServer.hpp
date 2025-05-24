@@ -18,6 +18,8 @@ namespace net
 	{
 	public:
 		TCPServer(std::string ip, uint16_t port);
+		TCPServer(const TCPServer&) = delete;
+		TCPServer& operator=(const TCPServer&) = delete;
 		virtual ~TCPServer();
 		void start();
 		void stop();
