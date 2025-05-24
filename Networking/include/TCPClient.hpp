@@ -21,6 +21,8 @@ namespace net
 	{
 	public:
 		TCPClient(std::string ipAddress, uint16_t port);
+		TCPClient(const TCPClient&) = delete;
+		TCPClient& operator=(const TCPClient&) = delete;
 		virtual ~TCPClient();
 		void run(); // Runs the tcp client in a new thread
 		void stop();
