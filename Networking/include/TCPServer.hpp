@@ -21,7 +21,8 @@ namespace net
 		virtual ~TCPServer();
 		void start();
 		void stop();
-		void setMaxAllowedConnections(uint32_t maxAllowedConnections);
+		/// Set the maximum allowed connections / client, nullopt = no limit
+		void setMaxAllowedConnections(std::optional<uint32_t> maxAllowedConnections);
 		size_t getCountOfConnectedClients() const;
 		std::shared_ptr<ServerMessage> getAndRemoveFirstMessage();
 		void sendMessage(std::shared_ptr<Message> message);
@@ -29,7 +30,6 @@ namespace net
 
 	private:
 		void sendMessage();
-		void writeMessageToClient(std::shared_ptr<Message> message);
 		void sendMessage(std::shared_ptr<Message> message, std::shared_ptr<Session> session);
 		void acceptConnection();
 		void readHeader(std::shared_ptr<Session> session);
